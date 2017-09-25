@@ -14,8 +14,8 @@ file_input = "tensorflow_binary_input_" + data_amount
 file_output = "tensorflow_binary_output_" + data_amount
 x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
 y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ")
-print(x_training_data)
-print(y_training_data)
+# print(x_training_data)
+# print(y_training_data)
 
 # Network Parameters
 input_node_amount = x_training_data.shape[1]
@@ -48,8 +48,8 @@ m = input_node_amount
 # m+1筆資料(x,y)，m+1個變數(m個weight，1個hidden threshold)，解聯立方程式，得到正確答案
 # 取前m+1筆y資料，並且套公式給定output weight和threshold
 # 不知道為什麼output weight & threshold要這樣給，給weight 1 ,threshold 0不好嗎? 可問蔡老師
-first_slfn_output_weight = (max(y_training_data) - min(y_training_data) + 2.0).reshape(1, 1)
-first_slfn_output_threshold = (min(y_training_data) - 1.0).reshape(1)
+first_slfn_output_weight = (np.max(y_training_data) - np.min(y_training_data) + 2.0).reshape(1, 1)
+first_slfn_output_threshold = (np.min(y_training_data) - 1.0).reshape(1)
 # print(first_slfn_output_weight)
 # print(first_slfn_output_threshold)
 desi_slice_y = y_training_data[:m+1]
@@ -140,6 +140,10 @@ with tool_graph.as_default():
 tool_sess = tf.Session(graph=tool_graph)
 tool_sess.run([tool_init])
 
+# 如果想看所有graph裡面的node 可以用下面這段code
+# for node in tf.get_default_graph().as_graph_def().node:
+#     print(node.name)
+
 # predict_y = sess.run([output_layer],
 #                              {x_placeholder: desi_slice_x,
 #                               y_placeholder: desi_slice_y})
@@ -162,18 +166,17 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
         squared_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
         # print(squared_residuals)
         # concat residual & origin data, sort by residual, depart residual
-        # TODO 把原始X和原始Y先併起來，併起來之後再和residual併，避免residual一樣的時候x和y的對應關係亂掉
-        concat_residual_and_x = np.concatenate((squared_residuals, x_training_data), axis=1)
-        concat_residual_and_y = np.concatenate((squared_residuals, y_training_data.reshape((data_size, output_node_amount))), axis=1)
-        sort_concat_x = concat_residual_and_x[np.argsort(concat_residual_and_x[:, 0])]
-        sort_concat_y = concat_residual_and_y[np.argsort(concat_residual_and_y[:, 0])]
-        x_training_data_sort_by_residual = np.delete(sort_concat_x, 0, axis=1)
-        y_training_data_sort_by_residual = np.delete(sort_concat_y, 0, axis=1)
-        # print(sort_concat_x)
-        # print(sort_concat_y)
+        concat_x_and_y = np.concatenate((x_training_data, y_training_data.reshape((m, output_node_amount))), axis=1)
+        concat_residual_and_x_y = np.concatenate((squared_residuals, concat_x_and_y), axis=1)
+        sort_result = concat_residual_and_x_y[np.argsort(concat_residual_and_x_y[:, 0])]
+        x_training_data_sort_by_residual = np.delete(sort_result, (0, m+1), axis=1)  # 去除0和m+1欄
+        y_training_data_sort_by_residual = np.delete(sort_result, slice(0, m+1), axis=1)  # 去除從0到m欄
+        # print(concat_x_and_y)
+        # print(concat_residual_and_x_y)
         # print(x_training_data_sort_by_residual)
         # print(y_training_data_sort_by_residual)
 
+        # take first n row of data, this stage use these data to train the NN
         current_stage_x_training_data = x_training_data_sort_by_residual[:n]
         current_stage_y_training_data = y_training_data_sort_by_residual[:n]
         # print(current_stage_x_training_data)
@@ -182,9 +185,6 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     # calculate (y - predict_y) ^ 2 and check the residuals are smaller than tolerance
     predict_y = sess.run([output_layer],
                          {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
-
-    # for node in tf.get_default_graph().as_graph_def().node:
-    #     print(node.name)
 
     # print(predict_y[0])
     # print(current_stage_y_training_data)
@@ -348,13 +348,13 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                 sess = tf.Session()
                 sess.run(init)
 
-                # verify add hidden node effect
-                predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data,
-                                                      y_placeholder: current_stage_y_training_data})[0]
-                print('predict y:')
-                print(predict_y)
-                print('origin y:')
-                print(current_stage_y_training_data)
+                # # verify add hidden node effect
+                # predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data,
+                #                                       y_placeholder: current_stage_y_training_data})[0]
+                # print('predict y:')
+                # print(predict_y)
+                # print('origin y:')
+                # print(current_stage_y_training_data)
 
                 print('after add hidden node, new training case is in envelope')
     #
@@ -633,4 +633,4 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     #     file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
     #     file.writelines("total execution time: " + str(time.time() - execute_start_time) + " seconds" + "\n")
     #     file.close()
-    #     print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
+print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
