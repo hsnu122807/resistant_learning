@@ -21,12 +21,12 @@ y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ")
 input_node_amount = x_training_data.shape[1]
 hidden_node_amount = 1
 output_node_amount = 1
-learning_rate_eta = 0.001
+learning_rate_eta = 0.005
 
 # Parameters
-thinking_times = 10
+every_stage_max_thinking_times = 3000
 data_size = x_training_data.shape[0]
-outlier_rate = 0.25
+outlier_rate = 0.1
 # squared_residual_tolerance = 0.5
 zeta = 0.05
 Lambda = 10000
@@ -152,39 +152,31 @@ tool_sess.run([tool_init])
 for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     print('-----stage: ' + str(n) + '-----')
 
-    if n == m+1:
-        apple = 1
-        # # get a random training case
-        # r = random.randint(0, data_size-1)
-        # current_stage_x_training_data = x_training_data[r-1:r]
-        # current_stage_y_training_data = y_training_data[r-1:r]
-    else:
-        # pick k data of smallest residual
-        predict_y = sess.run([output_layer],
-                             {x_placeholder: x_training_data,
-                              y_placeholder: y_training_data})
-        squared_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
-        # print(squared_residuals)
-        # concat residual & origin data, sort by residual, depart residual
-        concat_x_and_y = np.concatenate((x_training_data, y_training_data.reshape((m, output_node_amount))), axis=1)
-        concat_residual_and_x_y = np.concatenate((squared_residuals, concat_x_and_y), axis=1)
-        sort_result = concat_residual_and_x_y[np.argsort(concat_residual_and_x_y[:, 0])]
-        x_training_data_sort_by_residual = np.delete(sort_result, (0, m+1), axis=1)  # 去除0和m+1欄
-        y_training_data_sort_by_residual = np.delete(sort_result, slice(0, m+1), axis=1)  # 去除從0到m欄
-        # print(concat_x_and_y)
-        # print(concat_residual_and_x_y)
-        # print(x_training_data_sort_by_residual)
-        # print(y_training_data_sort_by_residual)
+    # pick k data of smallest residual
+    predict_y = sess.run([output_layer],
+                         {x_placeholder: x_training_data,
+                          y_placeholder: y_training_data})
+    squared_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
+    # print(squared_residuals)
+    # concat residual & origin data, sort by residual, depart residual
+    concat_x_and_y = np.concatenate((x_training_data, y_training_data.reshape((data_size, output_node_amount))), axis=1)
+    concat_residual_and_x_y = np.concatenate((squared_residuals, concat_x_and_y), axis=1)
+    sort_result = concat_residual_and_x_y[np.argsort(concat_residual_and_x_y[:, 0])]
+    x_training_data_sort_by_residual = np.delete(sort_result, (0, m + 1), axis=1)  # 去除0和m+1欄
+    y_training_data_sort_by_residual = np.delete(sort_result, slice(0, m + 1), axis=1)  # 去除從0到m欄
+    # print(concat_x_and_y)
+    # print(concat_residual_and_x_y)
+    # print(x_training_data_sort_by_residual)
+    # print(y_training_data_sort_by_residual)
 
-        # take first n row of data, this stage use these data to train the NN
-        current_stage_x_training_data = x_training_data_sort_by_residual[:n]
-        current_stage_y_training_data = y_training_data_sort_by_residual[:n]
-        # print(current_stage_x_training_data)
-        # print(current_stage_y_training_data)
+    # take first n row of data, this stage use these data to train the NN
+    current_stage_x_training_data = x_training_data_sort_by_residual[:n]
+    current_stage_y_training_data = y_training_data_sort_by_residual[:n]
+    # print(current_stage_x_training_data)
+    # print(current_stage_y_training_data)
 
     # calculate (y - predict_y) ^ 2 and check the residuals are smaller than tolerance
-    predict_y = sess.run([output_layer],
-                         {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
+    predict_y = sess.run([output_layer],{x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
 
     # print(predict_y[0])
     # print(current_stage_y_training_data)
@@ -193,7 +185,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
 
     # print(epsilon.shape)
     # print(current_stage_squared_residuals.shape)
-    if all(squared_residual**2 < epsilon**2 for squared_residual in current_stage_squared_residuals):
+    if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
         print('new training case can be classified without additional action')
     else:
         print('new training case larger than epsilon, apply GradientDescent to change weights & thresholds')
@@ -201,23 +193,19 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
         print('start BP')
         bp_failed = False
         saver.save(sess, r"{0}/model.ckpt".format(dir_path))
-        for stage in range(thinking_times):
-            sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data,
-                                       y_placeholder: current_stage_y_training_data})
+        for stage in range(every_stage_max_thinking_times):
+            sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data,y_placeholder: current_stage_y_training_data})
             thinking_times_count += 1
 
-            predict_y = sess.run([output_layer],
-                                 {x_placeholder: current_stage_x_training_data,
-                                  y_placeholder: current_stage_y_training_data})
+            predict_y = sess.run([output_layer],{x_placeholder: current_stage_x_training_data,y_placeholder: current_stage_y_training_data})
             current_stage_squared_residuals = np.square(current_stage_y_training_data - predict_y[0])
-            if all(squared_residual**2 < epsilon**2 for squared_residual in current_stage_squared_residuals):
+            if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
                 print('BP success!!!')
                 break
             else:
-                if stage == (thinking_times - 1):
+                if stage == (every_stage_max_thinking_times - 1):
                     bp_failed = True
-                    print(
-                        'BP failed: after {0} times training, residual still larger than tolerance.'.format((stage + 1)))
+                    print('BP failed: after {0} times training, residual still larger than tolerance.'.format((stage + 1)))
                     # MUST restore before cramming(因為調權重可能會讓先前的資料違反condition L)
                     print('restore weights.')
                     saver.restore(sess, r"{0}/model.ckpt".format(dir_path))
@@ -229,12 +217,8 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             hidden_node_amount += 2
             # calculate relevant parameters
             # 取得現有的weight&threshold陣列
-            current_hidden_weights, current_hidden_thresholds, current_output_weights, current_output_threshold, = sess.run(
-                [hidden_weights, hidden_thresholds, output_weights, output_threshold],
-                {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
-            predict_y = sess.run([output_layer],
-                                 {x_placeholder: current_stage_x_training_data,
-                                  y_placeholder: current_stage_y_training_data})
+            current_hidden_weights, current_hidden_thresholds, current_output_weights, current_output_threshold = sess.run([hidden_weights, hidden_thresholds, output_weights, output_threshold], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
+            predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
             # print('current hidden weights:')
             # print(current_hidden_weights)
             # print('current hidden thresholds:')
@@ -268,8 +252,8 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             # print(new_hidden_node_2_neuron_weights)
 
             # calculate new hidden threshold
-            new_hidden_node_1_threshold = sess.run([calculate_new_hidden_node_1_threshold], {x_k_placeholder: x_k, alpha_T_placeholder:current_stage_alpha_T})[0].reshape(1)
-            new_hidden_node_2_threshold = sess.run([calculate_new_hidden_node_2_threshold], {x_k_placeholder: x_k, alpha_T_placeholder:current_stage_alpha_T})[0].reshape(1)
+            new_hidden_node_1_threshold = sess.run([calculate_new_hidden_node_1_threshold], {x_k_placeholder: x_k, alpha_T_placeholder: current_stage_alpha_T})[0].reshape(1)
+            new_hidden_node_2_threshold = sess.run([calculate_new_hidden_node_2_threshold], {x_k_placeholder: x_k, alpha_T_placeholder: current_stage_alpha_T})[0].reshape(1)
             # print('new hidden node 1 threshold:')
             # print(new_hidden_node_1_threshold)
             # print('new hidden node 2 threshold:')
@@ -301,7 +285,6 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                 # placeholders
                 x_placeholder = tf.placeholder(tf.float64)
                 y_placeholder = tf.placeholder(tf.float64)
-                # tau_placeholder = tf.placeholder(tf.float64)
 
                 # network architecture
                 output_threshold = tf.Variable(current_output_threshold)
@@ -309,17 +292,11 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                 hidden_thresholds = tf.Variable(new_hidden_thresholds)
                 hidden_weights = tf.Variable(new_hidden_weights)
 
-                # hidden_layer_before_tanh = tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds)
-                # hidden_layer = tf.tanh(
-                #     tf.multiply(hidden_layer_before_tanh, tf.pow(tf.constant(2.0, dtype=tf.float64), tau_placeholder)))
-                # output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
-
                 hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
                 output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
 
                 # learning goal & optimizer
-                average_squared_residual = tf.reduce_mean(
-                    tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
+                average_squared_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
                 train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_squared_residual)
 
                 # saver
@@ -357,280 +334,293 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                 # print(current_stage_y_training_data)
 
                 print('after add hidden node, new training case is in envelope')
-    #
-    #             # softening
-    #             # save variables
-    #             saver.save(sess, r"{0}/model.ckpt".format(dir_path))
-    #
-    #             # change tau value of newest hidden node
-    #             newest_hidden_node_tau_value = tau_in_each_hidden_node[hidden_node_amount - 1]
-    #             print(newest_hidden_node_tau_value)
-    #             while newest_hidden_node_tau_value > 1:
-    #                 newest_hidden_node_tau_value -= 1
-    #                 tau_in_each_hidden_node[hidden_node_amount - 1] = newest_hidden_node_tau_value
-    #                 print('tau array:')
-    #                 print(tau_in_each_hidden_node)
-    #                 softening_success = False
-    #
-    #                 for times in range(thinking_times):
-    #                     # forward pass
-    #                     predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data,
-    #                                                           y_placeholder: current_stage_y_training_data,
-    #                                                           tau_placeholder: tau_in_each_hidden_node})
-    #                     # print(predict_y)
-    #
-    #                     # check condition L
-    #                     class_1_output = [tf.double.max]
-    #                     class_2_output = [tf.double.min]
-    #                     it = np.nditer(predict_y, flags=['f_index'])
-    #                     while not it.finished:
-    #                         if current_stage_y_training_data[it.index] == 1:
-    #                             class_1_output.append(it[0])
-    #                         else:  # if current_stage_y_training_data[it.index] == -1:
-    #                             class_2_output.append(it[0])
-    #                         it.iternext()
-    #                     test_alpha, test_beta = tool_sess.run(
-    #                         [min_alpha, max_beta], {tool_alpha: class_1_output, tool_beta: class_2_output})
-    #
-    #                     # print(alpha)
-    #                     # print(beta)
-    #                     if test_alpha > test_beta:
-    #                         alpha = test_alpha
-    #                         beta = test_beta
-    #                         print(
-    #                             'softening success, gradient descent trained {0} times, #{1} tau value decrease by 1, current tau value: {2}'.format(
-    #                                 times, hidden_node_amount, newest_hidden_node_tau_value))
-    #                         softening_success = True
-    #                         saver.save(sess, r"{0}/model.ckpt".format(dir_path))
-    #                         break
-    #                     else:
-    #                         sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data,
-    #                                                    y_placeholder: current_stage_y_training_data,
-    #                                                    tau_placeholder: tau_in_each_hidden_node})
-    #                         softening_thinking_times_count += 1
-    #
-    #                 if not softening_success:
-    #                     print(
-    #                         'softening failed, gradient descent trained {0} times, restore #{1} tau value , restore tau value: {2}'.format(
-    #                             times, hidden_node_amount, newest_hidden_node_tau_value + 1))
-    #                     tau_in_each_hidden_node[hidden_node_amount - 1] = newest_hidden_node_tau_value + 1
-    #                     saver.restore(sess, r"{0}/model.ckpt".format(dir_path))
-    #                     break
-    #
-    #             # PRUNING
-    #             if hidden_node_amount > 1:  # equals to the number of hidden nodes
-    #                 # get current weights & thresholds
-    #                 current_hidden_weights = hidden_weights.eval(sess)
-    #                 current_hidden_thresholds = hidden_thresholds.eval(sess)
-    #                 current_output_weights = output_weights.eval(sess)
-    #                 current_output_threshold = output_threshold.eval(sess)
-    #                 """
-    #                 print('#' * 10)
-    #                 print(current_hidden_weights)
-    #                 print(current_hidden_thresholds)
-    #                 print(current_output_weights)
-    #                 print(current_output_threshold)
-    #                 print('#' * 10)
-    #                 """
-    #
-    #                 # then try pruning from the begining hidden node
-    #                 for remove_index in range(hidden_node_amount):
-    #                     # 算出欲檢驗的結構之 weight 和 threshold
-    #                     exam_hidden_weights = np.concatenate(
-    #                         (
-    #                             current_hidden_weights[..., :remove_index],
-    #                             current_hidden_weights[..., remove_index + 1:]),
-    #                         axis=1)
-    #                     exam_hidden_thresholds = np.concatenate(
-    #                         (current_hidden_thresholds[:remove_index], current_hidden_thresholds[remove_index + 1:]),
-    #                         axis=0)
-    #                     exam_tau = np.delete(tau_in_each_hidden_node, remove_index)
-    #                     exam_output_weights = np.concatenate(
-    #                         (current_output_weights[:remove_index], current_output_weights[remove_index + 1:]), axis=0)
-    #
-    #                     # 建立測試 pruning 可行性的 Graph
-    #                     exam_graph = tf.Graph()
-    #                     with exam_graph.as_default():
-    #                         # placeholders
-    #                         exam_x_holder = tf.placeholder(tf.float64)
-    #                         exam_y_holder = tf.placeholder(tf.float64)
-    #                         exam_tau_holder = tf.placeholder(tf.float64)
-    #
-    #                         # exam variables
-    #                         exam_hidden_weights_var = tf.Variable(exam_hidden_weights)
-    #                         exam_hidden_thresholds_var = tf.Variable(exam_hidden_thresholds)
-    #                         exam_output_weights_var = tf.Variable(exam_output_weights)
-    #                         exam_output_threshold_var = tf.Variable(current_output_threshold)
-    #
-    #                         # exam tensors
-    #                         exam_hidden_layer_before_tanh = tf.add(tf.matmul(exam_x_holder, exam_hidden_weights_var),
-    #                                                                exam_hidden_thresholds_var)
-    #                         exam_hidden_layer = tf.tanh(
-    #                             tf.multiply(exam_hidden_layer_before_tanh,
-    #                                         tf.pow(tf.constant(2.0, dtype=tf.float64), exam_tau_holder)))
-    #                         exam_output_layer = tf.add(tf.matmul(exam_hidden_layer, exam_output_weights_var),
-    #                                                    exam_output_threshold_var)
-    #
-    #                         # exam goal & optimizer
-    #                         exam_average_squared_residual = tf.reduce_mean(
-    #                             tf.reduce_sum(tf.square(exam_y_holder - exam_output_layer), reduction_indices=[1]))
-    #                         exam_train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(
-    #                             exam_average_squared_residual)
-    #                         exam_init = tf.global_variables_initializer()
-    #
-    #                         # saver
-    #                         exam_saver = tf.train.Saver()
-    #
-    #                     # 使用 exam Session 執行 exam Graph
-    #                     exam_sess = tf.Session(graph=exam_graph)
-    #                     exam_sess.run(exam_init)
-    #                     exam_h_w_val, exam_h_t_val, exam_o_w_val, exam_o_t_val, exam_predict_y = exam_sess.run(
-    #                         [
-    #                             exam_hidden_weights_var,
-    #                             exam_hidden_thresholds_var,
-    #                             exam_output_weights_var,
-    #                             exam_output_threshold_var,
-    #                             exam_output_layer
-    #                         ],
-    #                         {
-    #                             exam_x_holder: current_stage_x_training_data,
-    #                             exam_y_holder: current_stage_y_training_data,
-    #                             exam_tau_holder: exam_tau
-    #                         }
-    #                     )
-    #
-    #                     # check if exam_alpha & exam_beta match condition L
-    #                     class_1_output = [tf.double.max]
-    #                     class_2_output = [tf.double.min]
-    #
-    #                     it = np.nditer(exam_predict_y, flags=['f_index'])
-    #                     while not it.finished:
-    #                         if current_stage_y_training_data[it.index] == 1:
-    #                             class_1_output.append(it[0])
-    #                         else:  # if current_stage_y_training_data[it.index] == -1:
-    #                             class_2_output.append(it[0])
-    #                         it.iternext()
-    #                     exam_alpha, exam_beta = tool_sess.run(
-    #                         [min_alpha, max_beta], {tool_alpha: class_1_output, tool_beta: class_2_output})
-    #                     # print('*' * 5 + "exam removing hidden node #{}".format(remove_index) + '*' * 5)
-    #                     # print("***** exam #{0} variables *****".format(remove_index))
-    #                     # print(exam_h_w_val)
-    #                     # print(exam_h_t_val)
-    #                     # print(exam_o_w_val)
-    #                     # print(exam_o_t_val)
-    #                     # print("***** exam #{0} predict_y *****".format(remove_index))
-    #                     # print(exam_predict_y)
-    #                     print("***** exam #{0} alpha & beta *****".format(remove_index))
-    #                     # print(list(zip(exam_predict_y, current_stage_y_training_data)))
-    #                     print('exam_alpha= ' + str(exam_alpha))
-    #                     print('exam_beta= ' + str(exam_beta))
-    #                     if exam_alpha <= exam_beta:
-    #                         print('pruning current hidden node #{0} will violate condition L'.format(remove_index))
-    #                         print('*' * 10)
-    #                         continue
-    #                     else:
-    #                         alpha = exam_alpha
-    #                         beta = exam_beta
-    #                         pruning_success_times_count += 1
-    #                         print("pruning current hidden node #{0} won't violate condition L".format(remove_index))
-    #                         print("!!!!! REMOVE hidden node #{0} !!!!!".format(remove_index))
-    #                         print('*' * 10)
-    #                         hidden_node_amount -= 1
-    #                         # 直接使用測試成功的 Session 和 Graph 取代舊的
-    #                         sess = exam_sess
-    #                         # 更換 placeholders 操作指標
-    #                         x_placeholder = exam_x_holder
-    #                         y_placeholder = exam_y_holder
-    #                         tau_placeholder = exam_tau_holder
-    #                         # 更換 variables 操作指標
-    #                         hidden_weights = exam_hidden_weights_var
-    #                         hidden_thresholds = exam_hidden_thresholds_var
-    #                         output_weights = exam_output_weights_var
-    #                         output_threshold = exam_output_threshold_var
-    #                         output_layer = exam_output_layer
-    #                         # 更換其他操作指標
-    #                         hidden_layer_before_tanh = exam_hidden_layer_before_tanh
-    #                         hidden_layer = exam_hidden_layer
-    #                         output_layer = exam_output_layer
-    #                         average_squared_residual = exam_average_squared_residual
-    #                         train = exam_train
-    #                         saver = exam_saver
-    #                         # modify constant
-    #                         tau_in_each_hidden_node = exam_tau
-    #                         break
-    # # if k == data_size:
-    # #     new_path = r"{0}/".format(dir_path) + file_output
-    # #     if not os.path.exists(new_path):
-    # #         os.makedirs(new_path)
-    # #
-    # #     file = open(new_path + r"\_training_detail.txt", 'w')
-    # #     file.writelines("learning_rate: " + str(learning_rate_eta) + "\n")
-    # #     file.writelines("input_node_amount: " + str(input_node_amount) + "\n")
-    # #     file.writelines("hidden_node_amount: " + str(hidden_node_amount) + "\n")
-    # #     file.writelines("output_node_amount: " + str(output_node_amount) + "\n")
-    # #     file.writelines("training_data_amount: " + str(data_size) + "\n")
-    # #     file.writelines("alpha(class 1 min value): " + str(alpha) + "\n")
-    # #     file.writelines("beta(class 2 max value): " + str(beta) + "\n")
-    # #     file.writelines("thinking_times_count: " + str(thinking_times_count) + "\n")
-    # #     file.writelines("cramming_times_count: " + str(cramming_times_count) + "\n")
-    # #     file.writelines("softening_thinking_times_count: " + str(softening_thinking_times_count) + "\n")
-    # #     file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
-    # #     file.writelines(
-    # #         "total execution time: " + str(time.time() - execute_start_time) + " seconds" + "\n")
-    # #     file.close()
-    # #     curr_hidden_neuron_weight = sess.run([hidden_weights], {x_placeholder: x_training_data,
-    # #                                                             y_placeholder: y_training_data,
-    # #                                                             tau_placeholder: tau_in_each_hidden_node})
-    # #     np.savetxt(new_path + r"\hidden_neuron_weight.txt", curr_hidden_neuron_weight)
-    # #     curr_hidden_threshold = sess.run([hidden_thresholds],
-    # #                                      {x_placeholder: x_training_data, y_placeholder: y_training_data,
-    # #                                       tau_placeholder: tau_in_each_hidden_node})
-    # #     np.savetxt(new_path + r"\hidden_threshold.txt", curr_hidden_threshold)
-    # #     curr_output_neuron_weight = sess.run([output_weights], {x_placeholder: x_training_data,
-    # #                                                             y_placeholder: y_training_data,
-    # #                                                             tau_placeholder: tau_in_each_hidden_node})
-    # #     np.savetxt(new_path + r"\output_neuron_weight.txt", curr_output_neuron_weight)
-    # #     curr_output_threshold = sess.run([output_threshold],
-    # #                                      {x_placeholder: x_training_data, y_placeholder: y_training_data,
-    # #                                       tau_placeholder: tau_in_each_hidden_node})
-    # #     np.savetxt(new_path + r"\output_threshold.txt", curr_output_threshold)
-    # #
-    # #     curr_average_loss = sess.run([average_squared_residual],
-    # #                                  {x_placeholder: x_training_data, y_placeholder: y_training_data,
-    # #                                   tau_placeholder: tau_in_each_hidden_node})
-    # #     file.writelines("average_loss_of_the_model: " + str(curr_average_loss) + "\n")
-    # #
-    # #     np.savetxt(new_path + r"\tau_in_each_hidden_node.txt", tau_in_each_hidden_node)
-    # #
-    # #     print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
-    #
-    # if n == data_size:
-    #     new_path = r"{0}/".format(dir_path) + file_output
-    #     if not os.path.exists(new_path):
-    #         os.makedirs(new_path)
-    #     curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
-    #         [hidden_weights, hidden_thresholds,
-    #          output_weights, output_threshold, average_squared_residual,
-    #          output_layer],
-    #         {x_placeholder: x_training_data, y_placeholder: y_training_data, tau_placeholder: tau_in_each_hidden_node})
-    #     np.savetxt(new_path + r"\hidden_neuron_weight.txt", curr_hidden_neuron_weight)
-    #     np.savetxt(new_path + r"\hidden_threshold.txt", curr_hidden_threshold)
-    #     np.savetxt(new_path + r"\output_neuron_weight.txt", curr_output_neuron_weight)
-    #     np.savetxt(new_path + r"\output_threshold.txt", curr_output_threshold)
-    #     np.savetxt(new_path + r"\tau_in_each_hidden_node.txt", tau_in_each_hidden_node)
-    #     file = open(new_path + r"\_training_detail.txt", 'w')
-    #     file.writelines("learning_rate: " + str(learning_rate_eta) + "\n")
-    #     file.writelines("input_node_amount: " + str(input_node_amount) + "\n")
-    #     file.writelines("hidden_node_amount: " + str(hidden_node_amount) + "\n")
-    #     file.writelines("output_node_amount: " + str(output_node_amount) + "\n")
-    #     file.writelines("training_data_amount: " + str(data_size) + "\n")
-    #     file.writelines("average_loss_of_the_model: " + str(curr_average_loss) + "\n")
-    #     file.writelines("alpha(class 1 min value): " + str(alpha) + "\n")
-    #     file.writelines("beta(class 2 max value): " + str(beta) + "\n")
-    #     file.writelines("thinking_times_count: " + str(thinking_times_count) + "\n")
-    #     file.writelines("cramming_times_count: " + str(cramming_times_count) + "\n")
-    #     file.writelines("softening_thinking_times_count: " + str(softening_thinking_times_count) + "\n")
-    #     file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
-    #     file.writelines("total execution time: " + str(time.time() - execute_start_time) + " seconds" + "\n")
-    #     file.close()
+            #
+            #             # softening
+            #             # save variables
+            #             saver.save(sess, r"{0}/model.ckpt".format(dir_path))
+            #
+            #             # change tau value of newest hidden node
+            #             newest_hidden_node_tau_value = tau_in_each_hidden_node[hidden_node_amount - 1]
+            #             print(newest_hidden_node_tau_value)
+            #             while newest_hidden_node_tau_value > 1:
+            #                 newest_hidden_node_tau_value -= 1
+            #                 tau_in_each_hidden_node[hidden_node_amount - 1] = newest_hidden_node_tau_value
+            #                 print('tau array:')
+            #                 print(tau_in_each_hidden_node)
+            #                 softening_success = False
+            #
+            #                 for times in range(thinking_times):
+            #                     # forward pass
+            #                     predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data,
+            #                                                           y_placeholder: current_stage_y_training_data,
+            #                                                           tau_placeholder: tau_in_each_hidden_node})
+            #                     # print(predict_y)
+            #
+            #                     # check condition L
+            #                     class_1_output = [tf.double.max]
+            #                     class_2_output = [tf.double.min]
+            #                     it = np.nditer(predict_y, flags=['f_index'])
+            #                     while not it.finished:
+            #                         if current_stage_y_training_data[it.index] == 1:
+            #                             class_1_output.append(it[0])
+            #                         else:  # if current_stage_y_training_data[it.index] == -1:
+            #                             class_2_output.append(it[0])
+            #                         it.iternext()
+            #                     test_alpha, test_beta = tool_sess.run(
+            #                         [min_alpha, max_beta], {tool_alpha: class_1_output, tool_beta: class_2_output})
+            #
+            #                     # print(alpha)
+            #                     # print(beta)
+            #                     if test_alpha > test_beta:
+            #                         alpha = test_alpha
+            #                         beta = test_beta
+            #                         print(
+            #                             'softening success, gradient descent trained {0} times, #{1} tau value decrease by 1, current tau value: {2}'.format(
+            #                                 times, hidden_node_amount, newest_hidden_node_tau_value))
+            #                         softening_success = True
+            #                         saver.save(sess, r"{0}/model.ckpt".format(dir_path))
+            #                         break
+            #                     else:
+            #                         sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data,
+            #                                                    y_placeholder: current_stage_y_training_data,
+            #                                                    tau_placeholder: tau_in_each_hidden_node})
+            #                         softening_thinking_times_count += 1
+            #
+            #                 if not softening_success:
+            #                     print(
+            #                         'softening failed, gradient descent trained {0} times, restore #{1} tau value , restore tau value: {2}'.format(
+            #                             times, hidden_node_amount, newest_hidden_node_tau_value + 1))
+            #                     tau_in_each_hidden_node[hidden_node_amount - 1] = newest_hidden_node_tau_value + 1
+            #                     saver.restore(sess, r"{0}/model.ckpt".format(dir_path))
+            #                     break
+            #
+            #             # PRUNING
+            #             if hidden_node_amount > 1:  # equals to the number of hidden nodes
+            #                 # get current weights & thresholds
+            #                 current_hidden_weights = hidden_weights.eval(sess)
+            #                 current_hidden_thresholds = hidden_thresholds.eval(sess)
+            #                 current_output_weights = output_weights.eval(sess)
+            #                 current_output_threshold = output_threshold.eval(sess)
+            #                 """
+            #                 print('#' * 10)
+            #                 print(current_hidden_weights)
+            #                 print(current_hidden_thresholds)
+            #                 print(current_output_weights)
+            #                 print(current_output_threshold)
+            #                 print('#' * 10)
+            #                 """
+            #
+            #                 # then try pruning from the begining hidden node
+            #                 for remove_index in range(hidden_node_amount):
+            #                     # 算出欲檢驗的結構之 weight 和 threshold
+            #                     exam_hidden_weights = np.concatenate(
+            #                         (
+            #                             current_hidden_weights[..., :remove_index],
+            #                             current_hidden_weights[..., remove_index + 1:]),
+            #                         axis=1)
+            #                     exam_hidden_thresholds = np.concatenate(
+            #                         (current_hidden_thresholds[:remove_index], current_hidden_thresholds[remove_index + 1:]),
+            #                         axis=0)
+            #                     exam_tau = np.delete(tau_in_each_hidden_node, remove_index)
+            #                     exam_output_weights = np.concatenate(
+            #                         (current_output_weights[:remove_index], current_output_weights[remove_index + 1:]), axis=0)
+            #
+            #                     # 建立測試 pruning 可行性的 Graph
+            #                     exam_graph = tf.Graph()
+            #                     with exam_graph.as_default():
+            #                         # placeholders
+            #                         exam_x_holder = tf.placeholder(tf.float64)
+            #                         exam_y_holder = tf.placeholder(tf.float64)
+            #                         exam_tau_holder = tf.placeholder(tf.float64)
+            #
+            #                         # exam variables
+            #                         exam_hidden_weights_var = tf.Variable(exam_hidden_weights)
+            #                         exam_hidden_thresholds_var = tf.Variable(exam_hidden_thresholds)
+            #                         exam_output_weights_var = tf.Variable(exam_output_weights)
+            #                         exam_output_threshold_var = tf.Variable(current_output_threshold)
+            #
+            #                         # exam tensors
+            #                         exam_hidden_layer_before_tanh = tf.add(tf.matmul(exam_x_holder, exam_hidden_weights_var),
+            #                                                                exam_hidden_thresholds_var)
+            #                         exam_hidden_layer = tf.tanh(
+            #                             tf.multiply(exam_hidden_layer_before_tanh,
+            #                                         tf.pow(tf.constant(2.0, dtype=tf.float64), exam_tau_holder)))
+            #                         exam_output_layer = tf.add(tf.matmul(exam_hidden_layer, exam_output_weights_var),
+            #                                                    exam_output_threshold_var)
+            #
+            #                         # exam goal & optimizer
+            #                         exam_average_squared_residual = tf.reduce_mean(
+            #                             tf.reduce_sum(tf.square(exam_y_holder - exam_output_layer), reduction_indices=[1]))
+            #                         exam_train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(
+            #                             exam_average_squared_residual)
+            #                         exam_init = tf.global_variables_initializer()
+            #
+            #                         # saver
+            #                         exam_saver = tf.train.Saver()
+            #
+            #                     # 使用 exam Session 執行 exam Graph
+            #                     exam_sess = tf.Session(graph=exam_graph)
+            #                     exam_sess.run(exam_init)
+            #                     exam_h_w_val, exam_h_t_val, exam_o_w_val, exam_o_t_val, exam_predict_y = exam_sess.run(
+            #                         [
+            #                             exam_hidden_weights_var,
+            #                             exam_hidden_thresholds_var,
+            #                             exam_output_weights_var,
+            #                             exam_output_threshold_var,
+            #                             exam_output_layer
+            #                         ],
+            #                         {
+            #                             exam_x_holder: current_stage_x_training_data,
+            #                             exam_y_holder: current_stage_y_training_data,
+            #                             exam_tau_holder: exam_tau
+            #                         }
+            #                     )
+            #
+            #                     # check if exam_alpha & exam_beta match condition L
+            #                     class_1_output = [tf.double.max]
+            #                     class_2_output = [tf.double.min]
+            #
+            #                     it = np.nditer(exam_predict_y, flags=['f_index'])
+            #                     while not it.finished:
+            #                         if current_stage_y_training_data[it.index] == 1:
+            #                             class_1_output.append(it[0])
+            #                         else:  # if current_stage_y_training_data[it.index] == -1:
+            #                             class_2_output.append(it[0])
+            #                         it.iternext()
+            #                     exam_alpha, exam_beta = tool_sess.run(
+            #                         [min_alpha, max_beta], {tool_alpha: class_1_output, tool_beta: class_2_output})
+            #                     # print('*' * 5 + "exam removing hidden node #{}".format(remove_index) + '*' * 5)
+            #                     # print("***** exam #{0} variables *****".format(remove_index))
+            #                     # print(exam_h_w_val)
+            #                     # print(exam_h_t_val)
+            #                     # print(exam_o_w_val)
+            #                     # print(exam_o_t_val)
+            #                     # print("***** exam #{0} predict_y *****".format(remove_index))
+            #                     # print(exam_predict_y)
+            #                     print("***** exam #{0} alpha & beta *****".format(remove_index))
+            #                     # print(list(zip(exam_predict_y, current_stage_y_training_data)))
+            #                     print('exam_alpha= ' + str(exam_alpha))
+            #                     print('exam_beta= ' + str(exam_beta))
+            #                     if exam_alpha <= exam_beta:
+            #                         print('pruning current hidden node #{0} will violate condition L'.format(remove_index))
+            #                         print('*' * 10)
+            #                         continue
+            #                     else:
+            #                         alpha = exam_alpha
+            #                         beta = exam_beta
+            #                         pruning_success_times_count += 1
+            #                         print("pruning current hidden node #{0} won't violate condition L".format(remove_index))
+            #                         print("!!!!! REMOVE hidden node #{0} !!!!!".format(remove_index))
+            #                         print('*' * 10)
+            #                         hidden_node_amount -= 1
+            #                         # 直接使用測試成功的 Session 和 Graph 取代舊的
+            #                         sess = exam_sess
+            #                         # 更換 placeholders 操作指標
+            #                         x_placeholder = exam_x_holder
+            #                         y_placeholder = exam_y_holder
+            #                         tau_placeholder = exam_tau_holder
+            #                         # 更換 variables 操作指標
+            #                         hidden_weights = exam_hidden_weights_var
+            #                         hidden_thresholds = exam_hidden_thresholds_var
+            #                         output_weights = exam_output_weights_var
+            #                         output_threshold = exam_output_threshold_var
+            #                         output_layer = exam_output_layer
+            #                         # 更換其他操作指標
+            #                         hidden_layer_before_tanh = exam_hidden_layer_before_tanh
+            #                         hidden_layer = exam_hidden_layer
+            #                         output_layer = exam_output_layer
+            #                         average_squared_residual = exam_average_squared_residual
+            #                         train = exam_train
+            #                         saver = exam_saver
+            #                         # modify constant
+            #                         tau_in_each_hidden_node = exam_tau
+            #                         break
+            # # if k == data_size:
+            # #     new_path = r"{0}/".format(dir_path) + file_output
+            # #     if not os.path.exists(new_path):
+            # #         os.makedirs(new_path)
+            # #
+            # #     file = open(new_path + r"\_training_detail.txt", 'w')
+            # #     file.writelines("learning_rate: " + str(learning_rate_eta) + "\n")
+            # #     file.writelines("input_node_amount: " + str(input_node_amount) + "\n")
+            # #     file.writelines("hidden_node_amount: " + str(hidden_node_amount) + "\n")
+            # #     file.writelines("output_node_amount: " + str(output_node_amount) + "\n")
+            # #     file.writelines("training_data_amount: " + str(data_size) + "\n")
+            # #     file.writelines("alpha(class 1 min value): " + str(alpha) + "\n")
+            # #     file.writelines("beta(class 2 max value): " + str(beta) + "\n")
+            # #     file.writelines("thinking_times_count: " + str(thinking_times_count) + "\n")
+            # #     file.writelines("cramming_times_count: " + str(cramming_times_count) + "\n")
+            # #     file.writelines("softening_thinking_times_count: " + str(softening_thinking_times_count) + "\n")
+            # #     file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
+            # #     file.writelines(
+            # #         "total execution time: " + str(time.time() - execute_start_time) + " seconds" + "\n")
+            # #     file.close()
+            # #     curr_hidden_neuron_weight = sess.run([hidden_weights], {x_placeholder: x_training_data,
+            # #                                                             y_placeholder: y_training_data,
+            # #                                                             tau_placeholder: tau_in_each_hidden_node})
+            # #     np.savetxt(new_path + r"\hidden_neuron_weight.txt", curr_hidden_neuron_weight)
+            # #     curr_hidden_threshold = sess.run([hidden_thresholds],
+            # #                                      {x_placeholder: x_training_data, y_placeholder: y_training_data,
+            # #                                       tau_placeholder: tau_in_each_hidden_node})
+            # #     np.savetxt(new_path + r"\hidden_threshold.txt", curr_hidden_threshold)
+            # #     curr_output_neuron_weight = sess.run([output_weights], {x_placeholder: x_training_data,
+            # #                                                             y_placeholder: y_training_data,
+            # #                                                             tau_placeholder: tau_in_each_hidden_node})
+            # #     np.savetxt(new_path + r"\output_neuron_weight.txt", curr_output_neuron_weight)
+            # #     curr_output_threshold = sess.run([output_threshold],
+            # #                                      {x_placeholder: x_training_data, y_placeholder: y_training_data,
+            # #                                       tau_placeholder: tau_in_each_hidden_node})
+            # #     np.savetxt(new_path + r"\output_threshold.txt", curr_output_threshold)
+            # #
+            # #     curr_average_loss = sess.run([average_squared_residual],
+            # #                                  {x_placeholder: x_training_data, y_placeholder: y_training_data,
+            # #                                   tau_placeholder: tau_in_each_hidden_node})
+            # #     file.writelines("average_loss_of_the_model: " + str(curr_average_loss) + "\n")
+            # #
+            # #     np.savetxt(new_path + r"\tau_in_each_hidden_node.txt", tau_in_each_hidden_node)
+            # #
+            # #     print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
+
+new_path = r"{0}/".format(dir_path) + file_output
+if not os.path.exists(new_path):
+    os.makedirs(new_path)
+curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
+            [hidden_weights, hidden_thresholds,
+             output_weights, output_threshold, average_squared_residual,
+             output_layer],
+            {x_placeholder: x_training_data, y_placeholder: y_training_data})
+predict_y = sess.run([output_layer],
+                         {x_placeholder: x_training_data,
+                          y_placeholder: y_training_data})
+squared_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
+# print(squared_residuals)
+# concat residual & origin data, sort by residual, depart residual
+concat_y_and_x = np.concatenate((y_training_data.reshape((data_size, output_node_amount)), x_training_data), axis=1)
+concat_predict_and_y_x = np.concatenate((predict_y[0], concat_y_and_x), axis=1)
+concat_residual_and_predict_x_y = np.concatenate((squared_residuals, concat_predict_and_y_x), axis=1)
+sort_result = concat_residual_and_predict_x_y[np.argsort(concat_residual_and_predict_x_y[:, 0])]
+
+np.savetxt(new_path + r"\hidden_neuron_weight.txt", curr_hidden_neuron_weight)
+np.savetxt(new_path + r"\hidden_threshold.txt", curr_hidden_threshold)
+np.savetxt(new_path + r"\output_neuron_weight.txt", curr_output_neuron_weight)
+np.savetxt(new_path + r"\output_threshold.txt", curr_output_threshold)
+np.savetxt(new_path + r"\training_data_residual_predict_output_desire_output_desire_input.txt", sort_result)
+
+file = open(new_path + r"\_training_detail.txt", 'w')
+file.writelines("learning_rate: " + str(learning_rate_eta) + "\n")
+file.writelines("input_node_amount: " + str(input_node_amount) + "\n")
+file.writelines("hidden_node_amount: " + str(hidden_node_amount) + "\n")
+file.writelines("output_node_amount: " + str(output_node_amount) + "\n")
+file.writelines("training_data_amount: " + str(data_size) + "\n")
+file.writelines("envelope_width_epsilon: " + str(epsilon) + "\n")
+file.writelines("outlier_rate: " + str(outlier_rate*100) + "%\n")
+file.writelines("average_loss_of_the_model: " + str(curr_average_loss) + "\n")
+file.writelines("thinking_times_count: " + str(thinking_times_count) + "\n")
+file.writelines("cramming_times_count: " + str(cramming_times_count) + "\n")
+file.writelines("softening_thinking_times_count: " + str(softening_thinking_times_count) + "\n")
+file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
+file.writelines("total execution time: " + str(time.time() - execute_start_time) + " seconds" + "\n")
+file.close()
+print("thinking times: %s" % thinking_times_count)
+print("hidden node: %s nodes" % hidden_node_amount)
 print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
