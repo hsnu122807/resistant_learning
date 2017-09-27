@@ -7,15 +7,23 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 execute_start_time = time.time()
 
-# file_input = "binary_training_input_data"
-# file_output = "binary_training_output_data"
-data_amount = '100'
-file_input = "tensorflow_binary_input_" + data_amount
-file_output = "tensorflow_binary_output_" + data_amount
-x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
-y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ")
-# print(x_training_data)
-# print(y_training_data)
+# # read data from file(test data)
+# data_amount = '1000'
+# file_input = "tensorflow_binary_input_" + data_amount
+# file_output = "tensorflow_binary_output_" + data_amount
+# file_name = file_input
+# x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
+# y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ")
+# # print(x_training_data)
+# # print(y_training_data)
+
+# read data from file
+file_name = "traffic"
+data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=",")
+x_training_data = np.delete(data, 5, axis=1)
+y_training_data = np.delete(data, slice(0, 5), axis=1)
+print(x_training_data)
+print(y_training_data)
 
 # Network Parameters
 input_node_amount = x_training_data.shape[1]
@@ -26,7 +34,7 @@ learning_rate_eta = 0.005
 # Parameters
 every_stage_max_thinking_times = 3000
 data_size = x_training_data.shape[0]
-outlier_rate = 0.1
+outlier_rate = 0.25
 # squared_residual_tolerance = 0.5
 zeta = 0.05
 Lambda = 10000
@@ -55,14 +63,14 @@ first_slfn_output_threshold = (np.min(y_training_data) - 1.0).reshape(1)
 desi_slice_y = y_training_data[:m+1]
 # print(desi_slice_y.shape)
 # 取得x經過運算後應該得到的hidden value(做tanh運算之前)
-yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).T
-# print(yc.shape)
+yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).reshape(m+1,1)
+print(yc.shape)
 # 對應給定的output weight & threshold，解hidden weight & threshold的聯立方程式
 desi_slice_x = x_training_data[:m+1]
 # 由於x原本只有m維，所以要加上1倍的threshold來變成m+1個變數，m+1筆資料，解方程式
 original_hidden_node_threshold = tf.ones([m+1, 1], dtype=tf.float64)
 xc = sess.run(tf.concat(axis=1, values=[desi_slice_x, original_hidden_node_threshold]))
-# print(xc)
+print(xc.shape)
 # 使用tf.matrix_solve_ls做矩陣運算解聯立方程式得到hidden weight & threshold
 answer = sess.run(tf.matrix_solve_ls(xc, yc, fast=False))
 # answer的前m個是hidden weight 最後一個是hidden threshold
@@ -73,7 +81,7 @@ first_slfn_hidden_threshold = answer[m:]
 # sess.run(change_shape_op_wh)
 # sess.run(change_shape_op_th)
 
-# 算出envelope width - epsilon
+# 算出envelope width: epsilon
 # optimum = tf.matrix_solve_ls(x_training_data, y_training_data, fast=False)
 # print(x_training_data.shape)
 opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data.reshape(data_size, 1), fast=False))
@@ -200,7 +208,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             predict_y = sess.run([output_layer],{x_placeholder: current_stage_x_training_data,y_placeholder: current_stage_y_training_data})
             current_stage_squared_residuals = np.square(current_stage_y_training_data - predict_y[0])
             if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
-                print('BP success!!!')
+                print('BP {0} times, all this stage training data meet the condition squared residual^2 < epsilon^2, thinking success!!!'.format((stage+1)))
                 break
             else:
                 if stage == (every_stage_max_thinking_times - 1):
@@ -581,7 +589,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             # #
             # #     print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
 
-new_path = r"{0}/".format(dir_path) + file_output
+new_path = r"{0}/".format(dir_path) + file_name
 if not os.path.exists(new_path):
     os.makedirs(new_path)
 curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
