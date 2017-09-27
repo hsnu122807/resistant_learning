@@ -17,13 +17,36 @@ execute_start_time = time.time()
 # # print(x_training_data)
 # # print(y_training_data)
 
+# # read data from file
+# file_name = "traffic"
+# data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=",")
+# x_training_data = np.delete(data, 5, axis=1)
+# y_training_data = np.delete(data, slice(0, 5), axis=1)
+# # print(x_training_data)
+# # print(y_training_data)
+
 # read data from file
-file_name = "traffic"
-data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=",")
-x_training_data = np.delete(data, 5, axis=1)
-y_training_data = np.delete(data, slice(0, 5), axis=1)
-print(x_training_data)
-print(y_training_data)
+rule = "19"
+ntu = "4"
+data_amount = "100"
+# light = "" or "light"
+light = "light"
+file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+"_"+light+"_no_label"
+file_output = "TensorFlow_output_for_" + data_amount
+file_name = file_input
+x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
+y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ")
+# print(x_training_data)
+# print(y_training_data)
+
+
+# create folder to save training process
+new_path = r"{0}/".format(dir_path) + file_name
+if not os.path.exists(new_path):
+    os.makedirs(new_path)
+
+# create file to save training process
+training_process = open(new_path + r"\_training_process.txt", 'w')
 
 # Network Parameters
 input_node_amount = x_training_data.shape[1]
@@ -34,7 +57,7 @@ learning_rate_eta = 0.005
 # Parameters
 every_stage_max_thinking_times = 3000
 data_size = x_training_data.shape[0]
-outlier_rate = 0.25
+outlier_rate = 0.05
 # squared_residual_tolerance = 0.5
 zeta = 0.05
 Lambda = 10000
@@ -61,29 +84,23 @@ first_slfn_output_threshold = (np.min(y_training_data) - 1.0).reshape(1)
 # print(first_slfn_output_weight)
 # print(first_slfn_output_threshold)
 desi_slice_y = y_training_data[:m+1]
-# print(desi_slice_y.shape)
+print(desi_slice_y.shape)
 # 取得x經過運算後應該得到的hidden value(做tanh運算之前)
-yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).reshape(m+1,1)
-print(yc.shape)
+yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).reshape(m+1, 1)
+# print(yc.shape)
 # 對應給定的output weight & threshold，解hidden weight & threshold的聯立方程式
 desi_slice_x = x_training_data[:m+1]
 # 由於x原本只有m維，所以要加上1倍的threshold來變成m+1個變數，m+1筆資料，解方程式
 original_hidden_node_threshold = tf.ones([m+1, 1], dtype=tf.float64)
 xc = sess.run(tf.concat(axis=1, values=[desi_slice_x, original_hidden_node_threshold]))
-print(xc.shape)
+# print(xc.shape)
 # 使用tf.matrix_solve_ls做矩陣運算解聯立方程式得到hidden weight & threshold
 answer = sess.run(tf.matrix_solve_ls(xc, yc, fast=False))
 # answer的前m個是hidden weight 最後一個是hidden threshold
 first_slfn_hidden_weight = answer[:m]
 first_slfn_hidden_threshold = answer[m:]
-# change_shape_op_wh = tf.assign(W_h, answer[:m], validate_shape=False)
-# change_shape_op_th = tf.assign(thr_h, answer[m:].reshape(1), validate_shape=False)
-# sess.run(change_shape_op_wh)
-# sess.run(change_shape_op_th)
 
 # 算出envelope width: epsilon
-# optimum = tf.matrix_solve_ls(x_training_data, y_training_data, fast=False)
-# print(x_training_data.shape)
 opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data.reshape(data_size, 1), fast=False))
 opt_output = sess.run(tf.matmul(x_training_data, opt))
 opt_distance = sess.run(tf.abs(opt_output - y_training_data.reshape(data_size, 1)))
@@ -97,7 +114,6 @@ epsilon = 2 * sigma  # envelope width(可以調整幾倍的標準差e.g. 2*sigma
 # placeholders
 x_placeholder = tf.placeholder(tf.float64)
 y_placeholder = tf.placeholder(tf.float64)
-# tau_placeholder = tf.placeholder(tf.float64)
 
 # network architecture
 output_threshold = tf.Variable(first_slfn_output_threshold, dtype=tf.float64)
@@ -148,7 +164,7 @@ with tool_graph.as_default():
 tool_sess = tf.Session(graph=tool_graph)
 tool_sess.run([tool_init])
 
-# 如果想看所有graph裡面的node 可以用下面這段code
+# 如果想看所有default graph裡面的node 可以用下面這段code
 # for node in tf.get_default_graph().as_graph_def().node:
 #     print(node.name)
 
@@ -159,6 +175,7 @@ tool_sess.run([tool_init])
 # input('123')
 for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     print('-----stage: ' + str(n) + '-----')
+    training_process.writelines('-----stage: ' + str(n) + '-----' + "\n")
 
     # pick k data of smallest residual
     predict_y = sess.run([output_layer],
@@ -184,7 +201,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     # print(current_stage_y_training_data)
 
     # calculate (y - predict_y) ^ 2 and check the residuals are smaller than tolerance
-    predict_y = sess.run([output_layer],{x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
+    predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
 
     # print(predict_y[0])
     # print(current_stage_y_training_data)
@@ -194,11 +211,14 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     # print(epsilon.shape)
     # print(current_stage_squared_residuals.shape)
     if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
-        print('new training case can be classified without additional action')
+        print('new training case can be classified without additional action.')
+        training_process.writelines('new training case can be classified without additional action.' + "\n")
     else:
-        print('new training case larger than epsilon, apply GradientDescent to change weights & thresholds')
+        print('new training case larger than epsilon, apply GradientDescent to change weights & thresholds.')
+        training_process.writelines('new training case larger than epsilon, apply GradientDescent to change weights & thresholds.' + "\n")
         # BP
-        print('start BP')
+        print('start BP.')
+        training_process.writelines('start BP.' + "\n")
         bp_failed = False
         saver.save(sess, r"{0}/model.ckpt".format(dir_path))
         for stage in range(every_stage_max_thinking_times):
@@ -209,18 +229,22 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             current_stage_squared_residuals = np.square(current_stage_y_training_data - predict_y[0])
             if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
                 print('BP {0} times, all this stage training data meet the condition squared residual^2 < epsilon^2, thinking success!!!'.format((stage+1)))
+                training_process.writelines('BP {0} times, all this stage training data meet the condition squared residual^2 < epsilon^2, thinking success!!!'.format((stage+1)) + "\n")
                 break
             else:
                 if stage == (every_stage_max_thinking_times - 1):
                     bp_failed = True
                     print('BP failed: after {0} times training, residual still larger than tolerance.'.format((stage + 1)))
+                    training_process.writelines('BP failed: after {0} times training, residual still larger than tolerance.'.format((stage + 1)) + "\n")
                     # MUST restore before cramming(因為調權重可能會讓先前的資料違反condition L)
-                    print('restore weights.')
                     saver.restore(sess, r"{0}/model.ckpt".format(dir_path))
+                    print('restore weights.')
+                    training_process.writelines('restore weights.' + "\n")
 
         if bp_failed:
             # add two hidden nodes to make the new training case squared residual less than tolerance
             print('add two hidden nodes')
+            training_process.writelines('add two hidden nodes.' + "\n")
             cramming_times_count += 1
             hidden_node_amount += 2
             # calculate relevant parameters
@@ -589,9 +613,10 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             # #
             # #     print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
 
-new_path = r"{0}/".format(dir_path) + file_name
-if not os.path.exists(new_path):
-    os.makedirs(new_path)
+# close the recording file of training process
+training_process.close()
+
+# train end, get NN status
 curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
             [hidden_weights, hidden_thresholds,
              output_weights, output_threshold, average_squared_residual,
