@@ -8,12 +8,12 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 execute_start_time = time.time()
 
 # # read data from file(test data)
-# data_amount = '1000'
+# data_amount = 'test'
 # file_input = "tensorflow_binary_input_" + data_amount
 # file_output = "tensorflow_binary_output_" + data_amount
 # file_name = file_input
 # x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
-# y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ")
+# y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
 # # print(x_training_data)
 # # print(y_training_data)
 
@@ -26,16 +26,16 @@ execute_start_time = time.time()
 # # print(y_training_data)
 
 # read data from file
-rule = "19"
-ntu = "4"
-data_amount = "100"
-# light = "" or "light"
-light = "light"
-file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+"_"+light+"_no_label"
+rule = "10"
+ntu = "3"
+data_amount = "1250"
+# light = "" or "_light"
+light = ""
+file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
 file_output = "TensorFlow_output_for_" + data_amount
 file_name = file_input
 x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
-y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ")
+y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
 # print(x_training_data)
 # print(y_training_data)
 
@@ -72,9 +72,27 @@ pruning_success_times_count = 0
 sess = tf.Session()
 # sess.run(init)
 
+# 算出envelope width: epsilon
+# 這邊的意義可以再問一下蔡老師
+# 用規劃求解算出誤差最小的模型[[X1],[X2],[X3],...,[Xm]]
+opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data, fast=False))
+# print(opt)
+# 算出所有資料用此模型得到的輸出值
+opt_output = sess.run(tf.matmul(x_training_data, opt))
+# print(opt_output)
+# 輸出值減掉實際的y值後取絕對值，得到此模型的差的矩陣
+opt_distance = sess.run(tf.abs(opt_output - y_training_data))
+# print(opt_distance)
+# 取得差矩陣的平均值(用不到)以及變異數
+mean, var = tf.nn.moments(tf.stack(opt_distance), axes=[0])
+# stander deviation(全體資料的線性迴歸的標準差)
+sigma = sess.run(tf.sqrt(var))
+# print(sigma)
+# envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
+epsilon = 2 * sigma
+
 # 首先架構初始SLFN
 m = input_node_amount
-
 # 第一次取m+1筆資料算出first SLFN 的初始權重，算法是做矩陣列運算解聯立方程式，讓前m+1筆資料都可以完美符合這個模型
 # m+1筆資料(x,y)，m+1個變數(m個weight，1個hidden threshold)，解聯立方程式，得到正確答案
 # 取前m+1筆y資料，並且套公式給定output weight和threshold
@@ -84,15 +102,15 @@ first_slfn_output_threshold = (np.min(y_training_data) - 1.0).reshape(1)
 # print(first_slfn_output_weight)
 # print(first_slfn_output_threshold)
 desi_slice_y = y_training_data[:m+1]
-print(desi_slice_y.shape)
+# print(desi_slice_y.shape)
 # 取得x經過運算後應該得到的hidden value(做tanh運算之前)
 yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).reshape(m+1, 1)
 # print(yc.shape)
 # 對應給定的output weight & threshold，解hidden weight & threshold的聯立方程式
 desi_slice_x = x_training_data[:m+1]
 # 由於x原本只有m維，所以要加上1倍的threshold來變成m+1個變數，m+1筆資料，解方程式
-original_hidden_node_threshold = tf.ones([m+1, 1], dtype=tf.float64)
-xc = sess.run(tf.concat(axis=1, values=[desi_slice_x, original_hidden_node_threshold]))
+hidden_node_threshold_vector = tf.ones([m + 1, 1], dtype=tf.float64)
+xc = sess.run(tf.concat(axis=1, values=[desi_slice_x, hidden_node_threshold_vector]))
 # print(xc.shape)
 # 使用tf.matrix_solve_ls做矩陣運算解聯立方程式得到hidden weight & threshold
 answer = sess.run(tf.matrix_solve_ls(xc, yc, fast=False))
@@ -100,17 +118,7 @@ answer = sess.run(tf.matrix_solve_ls(xc, yc, fast=False))
 first_slfn_hidden_weight = answer[:m]
 first_slfn_hidden_threshold = answer[m:]
 
-# 算出envelope width: epsilon
-opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data.reshape(data_size, 1), fast=False))
-opt_output = sess.run(tf.matmul(x_training_data, opt))
-opt_distance = sess.run(tf.abs(opt_output - y_training_data.reshape(data_size, 1)))
-# print(opt_distance.shape)
-mean, var = tf.nn.moments(tf.stack(opt_distance), axes=[0])
-sigma = sess.run(tf.sqrt(var))  # stander deviation(全體資料的線性回歸的標準差)
-# print(sigma)
-epsilon = 2 * sigma  # envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
-
-# 架構第一個SLFN
+# 架構第一個SLFN的tensor
 # placeholders
 x_placeholder = tf.placeholder(tf.float64)
 y_placeholder = tf.placeholder(tf.float64)
@@ -168,23 +176,18 @@ tool_sess.run([tool_init])
 # for node in tf.get_default_graph().as_graph_def().node:
 #     print(node.name)
 
-# predict_y = sess.run([output_layer],
-#                              {x_placeholder: desi_slice_x,
-#                               y_placeholder: desi_slice_y})
 # print(predict_y)
 # input('123')
 for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     print('-----stage: ' + str(n) + '-----')
     training_process.writelines('-----stage: ' + str(n) + '-----' + "\n")
 
-    # pick k data of smallest residual
-    predict_y = sess.run([output_layer],
-                         {x_placeholder: x_training_data,
-                          y_placeholder: y_training_data})
-    squared_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
+    # pick n data of smallest residual
+    predict_y = sess.run([output_layer], {x_placeholder: x_training_data, y_placeholder: y_training_data})
+    squared_residuals = np.square(predict_y[0] - y_training_data)
     # print(squared_residuals)
     # concat residual & origin data, sort by residual, depart residual
-    concat_x_and_y = np.concatenate((x_training_data, y_training_data.reshape((data_size, output_node_amount))), axis=1)
+    concat_x_and_y = np.concatenate((x_training_data, y_training_data), axis=1)
     concat_residual_and_x_y = np.concatenate((squared_residuals, concat_x_and_y), axis=1)
     sort_result = concat_residual_and_x_y[np.argsort(concat_residual_and_x_y[:, 0])]
     x_training_data_sort_by_residual = np.delete(sort_result, (0, m + 1), axis=1)  # 去除0和m+1欄
@@ -225,7 +228,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data,y_placeholder: current_stage_y_training_data})
             thinking_times_count += 1
 
-            predict_y = sess.run([output_layer],{x_placeholder: current_stage_x_training_data,y_placeholder: current_stage_y_training_data})
+            predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
             current_stage_squared_residuals = np.square(current_stage_y_training_data - predict_y[0])
             if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
                 print('BP {0} times, all this stage training data meet the condition squared residual^2 < epsilon^2, thinking success!!!'.format((stage+1)))
