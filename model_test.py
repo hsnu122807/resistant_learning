@@ -7,23 +7,41 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 x_placeholder = tf.placeholder(tf.float64)
 # y_placeholder = tf.placeholder(tf.float64)
 
-rule = "1"
-ntu = "1"
-data_amount = "1250"
+rule = "19"
+ntu = "4"
+data_amount = "100"
 # light = "" or "_light"
-light = ""
-file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
+light = "_light"
+sigma = "1"
+file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"+"_sigma_"+sigma
+# file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
 dir_target = dir_path + r"\TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
 
 ot = np.loadtxt(dir_target+r"\output_threshold.txt", dtype=float, delimiter=" ").reshape(1)
 ow = np.loadtxt(dir_target+r"\output_neuron_weight.txt", dtype=float, delimiter=" ").reshape((-1, 1))
 ht = np.loadtxt(dir_target+r"\hidden_threshold.txt", dtype=float, delimiter=" ").reshape((1, -1))
 hw = np.loadtxt(dir_target+r"\hidden_neuron_weight.txt", dtype=float, delimiter=" ").reshape((-1, ht.shape[1]))
+
 training_data_result = np.loadtxt(dir_target+r"\training_data_residual_predict_output_desire_output_desire_input.txt")
+
 training_data_predict_output = training_data_result[:, 1]
 training_data_desire_output = training_data_result[:, 2]
 # print(training_data_predict_output)
 # print(training_data_desire_output.shape[0])
+not_outlier_data_amount = int(training_data_desire_output.shape[0] * 0.95)
+outliers_predict_output = training_data_predict_output[not_outlier_data_amount:]
+outliers_desire_output = training_data_desire_output[not_outlier_data_amount:]
+# print(outliers_predict_output)
+# print(outliers_desire_output)
+outlier_benign_count = 0
+outlier_malware_count = 0
+for i in range(outliers_desire_output.shape[0]):
+    if outliers_desire_output[i] == 1:
+        outlier_benign_count += 1
+    elif outliers_desire_output[i] == -1:
+        outlier_malware_count += 1
+# input("123")
+
 training_data_benign_count = 0
 training_data_malware_count = 0
 training_data_benign_predict_correct_count = 0
@@ -82,3 +100,4 @@ print("False Positive of Benign Training Data: {0}/{1}".format(training_data_ben
 print("False Negative of Rule Training Data: {0}/{1}".format(training_data_malware_count-training_data_malware_predict_correct_count, training_data_malware_count))
 print("False Positive of Benign Testing Data: {0}/{1}".format(testing_data_benign_predict_wrong_count, testing_data_benign_count))
 print("False Negative of Rule Testing Data: {0}/{1}".format(testing_data_malware_predict_wrong_count, testing_data_malware_count))
+print("There are {0} benign & {1} malware in outliers".format(outlier_benign_count, outlier_malware_count))

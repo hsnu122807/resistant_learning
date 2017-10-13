@@ -8,7 +8,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 execute_start_time = time.time()
 
 # # read data from file(test data)
-# data_amount = 'test'
+# data_amount = '100'
 # file_input = "tensorflow_binary_input_" + data_amount
 # file_output = "tensorflow_binary_output_" + data_amount
 # file_name = file_input
@@ -26,27 +26,18 @@ execute_start_time = time.time()
 # # print(y_training_data)
 
 # read data from file
-rule = "10"
+rule = "11"
 ntu = "3"
-data_amount = "1250"
+data_amount = "100"
 # light = "" or "_light"
-light = ""
+light = "_light"
 file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
 file_output = "TensorFlow_output_for_" + data_amount
-file_name = file_input
+# file_name = file_input
 x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
 y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
 # print(x_training_data)
 # print(y_training_data)
-
-
-# create folder to save training process
-new_path = r"{0}/".format(dir_path) + file_name
-if not os.path.exists(new_path):
-    os.makedirs(new_path)
-
-# create file to save training process
-training_process = open(new_path + r"\_training_process.txt", 'w')
 
 # Network Parameters
 input_node_amount = x_training_data.shape[1]
@@ -61,6 +52,17 @@ outlier_rate = 0.05
 # squared_residual_tolerance = 0.5
 zeta = 0.05
 Lambda = 10000
+sigma_multiplier = 0.1
+
+file_name = file_input + "_sigma_" + str(sigma_multiplier)
+
+# create folder to save training process
+new_path = r"{0}/".format(dir_path) + file_name
+if not os.path.exists(new_path):
+    os.makedirs(new_path)
+
+# create file to save training process
+training_process = open(new_path + r"\_training_process.txt", 'w')
 
 # counters
 thinking_times_count = 0
@@ -89,7 +91,7 @@ mean, var = tf.nn.moments(tf.stack(opt_distance), axes=[0])
 sigma = sess.run(tf.sqrt(var))
 # print(sigma)
 # envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
-epsilon = 2 * sigma
+epsilon = sigma_multiplier * sigma
 
 # 首先架構初始SLFN
 m = input_node_amount
@@ -274,7 +276,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             alpha_success = False
             while not alpha_success:
                 beta_k = np.random.random_sample((1, m)) + 1
-                if sess.run([Cal_table2], {beta_k_placeholder: beta_k, x_c_placeholder: x_c, x_k_placeholder: x_k}) != 0:
+                if sess.run([Cal_table2], {beta_k_placeholder: beta_k, x_c_placeholder: x_c, x_k_placeholder: x_k})[0] != 0:
                     alpha_success = True
 
             current_stage_alpha_T = sess.run([alpha_T], {beta_k_placeholder: beta_k})[0]
@@ -648,6 +650,8 @@ file.writelines("input_node_amount: " + str(input_node_amount) + "\n")
 file.writelines("hidden_node_amount: " + str(hidden_node_amount) + "\n")
 file.writelines("output_node_amount: " + str(output_node_amount) + "\n")
 file.writelines("training_data_amount: " + str(data_size) + "\n")
+file.writelines("sigma: " + str(sigma) + "\n")
+file.writelines("sigma_multiplier: " + str(sigma_multiplier) + "\n")
 file.writelines("envelope_width_epsilon: " + str(epsilon) + "\n")
 file.writelines("outlier_rate: " + str(outlier_rate*100) + "%\n")
 file.writelines("average_loss_of_the_model: " + str(curr_average_loss) + "\n")
