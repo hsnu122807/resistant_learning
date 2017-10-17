@@ -4,6 +4,8 @@ import time
 import random
 import os
 
+#coding=utf-8
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 execute_start_time = time.time()
 
@@ -26,7 +28,7 @@ execute_start_time = time.time()
 # # print(y_training_data)
 
 # read data from file
-rule = "11"
+rule = "2"
 ntu = "3"
 data_amount = "100"
 # light = "" or "_light"
@@ -122,21 +124,26 @@ first_slfn_hidden_threshold = answer[m:]
 
 # 架構第一個SLFN的tensor
 # placeholders
-x_placeholder = tf.placeholder(tf.float64)
-y_placeholder = tf.placeholder(tf.float64)
+with tf.name_scope('inputs'):
+    x_placeholder = tf.placeholder(tf.float64, name='x_input')
+    y_placeholder = tf.placeholder(tf.float64, name='y_input')
 
 # network architecture
-output_threshold = tf.Variable(first_slfn_output_threshold, dtype=tf.float64)
-output_weights = tf.Variable(first_slfn_output_weight, dtype=tf.float64)
-hidden_thresholds = tf.Variable(first_slfn_hidden_threshold, dtype=tf.float64)
-hidden_weights = tf.Variable(first_slfn_hidden_weight, dtype=tf.float64)
 
-hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
-output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
+with tf.name_scope('hidden_layer'):
+    hidden_thresholds = tf.Variable(first_slfn_hidden_threshold, dtype=tf.float64, name='hidden_threshold')
+    hidden_weights = tf.Variable(first_slfn_hidden_weight, dtype=tf.float64, name='hidden_weight')
+    hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
+with tf.name_scope('output_layer'):
+    output_threshold = tf.Variable(first_slfn_output_threshold, dtype=tf.float64, name='output_threshold')
+    output_weights = tf.Variable(first_slfn_output_weight, dtype=tf.float64, name='hidden_weight')
+    output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
 
 # learning goal & optimizer
-average_squared_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
-train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_squared_residual)
+with tf.name_scope('loss'):
+    average_squared_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
+with tf.name_scope('train'):
+    train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_squared_residual)
 
 # saver
 saver = tf.train.Saver()
@@ -620,6 +627,9 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
 
 # close the recording file of training process
 training_process.close()
+
+# tf.train.SummaryWriter soon be deprecated, use following
+writer = tf.summary.FileWriter("logs/", sess.graph)
 
 # train end, get NN status
 curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
