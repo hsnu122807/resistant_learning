@@ -1,13 +1,12 @@
+# coding:utf-8
 import tensorflow as tf
 import numpy as np
 import time
 import random
 import os
 
-#coding=utf-8
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
-execute_start_time = time.time()
+
 
 # # read data from file(test data)
 # data_amount = '100'
@@ -28,8 +27,8 @@ execute_start_time = time.time()
 # # print(y_training_data)
 
 # read data from file
-rule = "2"
-ntu = "3"
+rule = "22"
+ntu = "4"
 data_amount = "100"
 # light = "" or "_light"
 light = "_light"
@@ -40,6 +39,8 @@ x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
 y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
 # print(x_training_data)
 # print(y_training_data)
+
+execute_start_time = time.time()
 
 # Network Parameters
 input_node_amount = x_training_data.shape[1]
@@ -54,7 +55,7 @@ outlier_rate = 0.05
 # squared_residual_tolerance = 0.5
 zeta = 0.05
 Lambda = 10000
-sigma_multiplier = 0.1
+sigma_multiplier = 1
 
 file_name = file_input + "_sigma_" + str(sigma_multiplier)
 
@@ -76,51 +77,53 @@ pruning_success_times_count = 0
 sess = tf.Session()
 # sess.run(init)
 
-# 算出envelope width: epsilon
-# 這邊的意義可以再問一下蔡老師
-# 用規劃求解算出誤差最小的模型[[X1],[X2],[X3],...,[Xm]]
-opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data, fast=False))
-# print(opt)
-# 算出所有資料用此模型得到的輸出值
-opt_output = sess.run(tf.matmul(x_training_data, opt))
-# print(opt_output)
-# 輸出值減掉實際的y值後取絕對值，得到此模型的差的矩陣
-opt_distance = sess.run(tf.abs(opt_output - y_training_data))
-# print(opt_distance)
-# 取得差矩陣的平均值(用不到)以及變異數
-mean, var = tf.nn.moments(tf.stack(opt_distance), axes=[0])
-# stander deviation(全體資料的線性迴歸的標準差)
-sigma = sess.run(tf.sqrt(var))
-# print(sigma)
-# envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
-epsilon = sigma_multiplier * sigma
+with tf.name_scope('calculate_envelope_width'):
+    # 算出envelope width: epsilon
+    # 這邊的意義可以再問一下蔡老師
+    # 用規劃求解算出誤差最小的模型[[X1],[X2],[X3],...,[Xm]]
+    opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data, fast=False, name='solve_matrix'))
+    # print(opt)
+    # 算出所有資料用此模型得到的輸出值
+    opt_output = sess.run(tf.matmul(x_training_data, opt, name='matmul'))
+    # print(opt_output)
+    # 輸出值減掉實際的y值後取絕對值，得到此模型的差的矩陣
+    opt_distance = sess.run(tf.abs(opt_output - y_training_data, name='abs'))
+    # print(opt_distance)
+    # 取得差矩陣的平均值(用不到)以及變異數
+    mean, var = tf.nn.moments(tf.stack(opt_distance, name='stack'), axes=[0], name='get_var')
+    # stander deviation(全體資料的線性迴歸的標準差)
+    sigma = sess.run(tf.sqrt(var, name='sqrt'))
+    # print(sigma)
+    # envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
+    epsilon = sigma_multiplier * sigma
 
-# 首先架構初始SLFN
-m = input_node_amount
-# 第一次取m+1筆資料算出first SLFN 的初始權重，算法是做矩陣列運算解聯立方程式，讓前m+1筆資料都可以完美符合這個模型
-# m+1筆資料(x,y)，m+1個變數(m個weight，1個hidden threshold)，解聯立方程式，得到正確答案
-# 取前m+1筆y資料，並且套公式給定output weight和threshold
-# 不知道為什麼output weight & threshold要這樣給，給weight 1 ,threshold 0不好嗎? 可問蔡老師
-first_slfn_output_weight = (np.max(y_training_data) - np.min(y_training_data) + 2.0).reshape(1, 1)
-first_slfn_output_threshold = (np.min(y_training_data) - 1.0).reshape(1)
-# print(first_slfn_output_weight)
-# print(first_slfn_output_threshold)
-desi_slice_y = y_training_data[:m+1]
-# print(desi_slice_y.shape)
-# 取得x經過運算後應該得到的hidden value(做tanh運算之前)
-yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).reshape(m+1, 1)
-# print(yc.shape)
-# 對應給定的output weight & threshold，解hidden weight & threshold的聯立方程式
-desi_slice_x = x_training_data[:m+1]
-# 由於x原本只有m維，所以要加上1倍的threshold來變成m+1個變數，m+1筆資料，解方程式
-hidden_node_threshold_vector = tf.ones([m + 1, 1], dtype=tf.float64)
-xc = sess.run(tf.concat(axis=1, values=[desi_slice_x, hidden_node_threshold_vector]))
-# print(xc.shape)
-# 使用tf.matrix_solve_ls做矩陣運算解聯立方程式得到hidden weight & threshold
-answer = sess.run(tf.matrix_solve_ls(xc, yc, fast=False))
-# answer的前m個是hidden weight 最後一個是hidden threshold
-first_slfn_hidden_weight = answer[:m]
-first_slfn_hidden_threshold = answer[m:]
+with tf.name_scope('calculate_first_slfn_weights'):
+    # 首先架構初始SLFN
+    m = input_node_amount
+    # 第一次取m+1筆資料算出first SLFN 的初始權重，算法是做矩陣列運算解聯立方程式，讓前m+1筆資料都可以完美符合這個模型
+    # m+1筆資料(x,y)，m+1個變數(m個weight，1個hidden threshold)，解聯立方程式，得到正確答案
+    # 取前m+1筆y資料，並且套公式給定output weight和threshold
+    # 不知道為什麼output weight & threshold要這樣給，給weight 1 ,threshold 0不好嗎? 可問蔡老師
+    first_slfn_output_weight = (np.max(y_training_data) - np.min(y_training_data) + 2.0).reshape(1, 1)
+    first_slfn_output_threshold = (np.min(y_training_data) - 1.0).reshape(1)
+    # print(first_slfn_output_weight)
+    # print(first_slfn_output_threshold)
+    desi_slice_y = y_training_data[:m+1]
+    # print(desi_slice_y.shape)
+    # 取得x經過運算後應該得到的hidden value(做tanh運算之前)
+    yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).reshape(m+1, 1)
+    # print(yc.shape)
+    # 對應給定的output weight & threshold，解hidden weight & threshold的聯立方程式
+    desi_slice_x = x_training_data[:m+1]
+    # 由於x原本只有m維，所以要加上1倍的threshold來變成m+1個變數，m+1筆資料，解方程式
+    hidden_node_threshold_vector = tf.ones([m + 1, 1], dtype=tf.float64)
+    xc = sess.run(tf.concat(axis=1, values=[desi_slice_x, hidden_node_threshold_vector]))
+    # print(xc.shape)
+    # 使用tf.matrix_solve_ls做矩陣運算解聯立方程式得到hidden weight & threshold
+    answer = sess.run(tf.matrix_solve_ls(xc, yc, fast=False))
+    # answer的前m個是hidden weight 最後一個是hidden threshold
+    first_slfn_hidden_weight = answer[:m]
+    first_slfn_hidden_threshold = answer[m:]
 
 # 架構第一個SLFN的tensor
 # placeholders
@@ -129,7 +132,6 @@ with tf.name_scope('inputs'):
     y_placeholder = tf.placeholder(tf.float64, name='y_input')
 
 # network architecture
-
 with tf.name_scope('hidden_layer'):
     hidden_thresholds = tf.Variable(first_slfn_hidden_threshold, dtype=tf.float64, name='hidden_threshold')
     hidden_weights = tf.Variable(first_slfn_hidden_weight, dtype=tf.float64, name='hidden_weight')
@@ -152,34 +154,40 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 
-# alpha_T的算法，會用在加hidden node的時候
-beta_k_placeholder = tf.placeholder(tf.float64)
-x_c_placeholder = tf.placeholder(tf.float64)
-x_k_placeholder = tf.placeholder(tf.float64)
-test = tf.sqrt(tf.reduce_sum(tf.square(beta_k_placeholder)))
-alpha = tf.div(beta_k_placeholder, test)
-alpha_T = tf.transpose(alpha)
-Cal_table2 = tf.reduce_sum(tf.matmul(tf.subtract(x_c_placeholder, x_k_placeholder), alpha_T))
+with tf.name_scope('calculate_alpha_T'):
+    # alpha_T的算法，會用在加hidden node的時候
+    beta_k_placeholder = tf.placeholder(tf.float64, name='beta_k')
+    x_c_placeholder = tf.placeholder(tf.float64, name='x_c')
+    x_k_placeholder = tf.placeholder(tf.float64, name='x_k')
+    test = tf.sqrt(tf.reduce_sum(tf.square(beta_k_placeholder, name='square'), name='reduce_sum'), name='sqrt')
+    alpha = tf.div(beta_k_placeholder, test, name='alpha')
+    alpha_T = tf.transpose(alpha, name='transpose')
+    Cal_table2 = tf.reduce_sum(tf.matmul(tf.subtract(x_c_placeholder, x_k_placeholder), alpha_T), name='test_alpha')
 
-# new hidden node threshold的算法
-alpha_T_placeholder = tf.placeholder(tf.float64)
-calculate_new_hidden_node_1_threshold = zeta - Lambda * tf.matmul(x_k_placeholder, alpha_T_placeholder)
-calculate_new_hidden_node_2_threshold = zeta + Lambda * tf.matmul(x_k_placeholder, alpha_T_placeholder)
+with tf.name_scope('calculate_new_hidden_threshold'):
+    # new hidden node threshold的算法
+    alpha_T_placeholder = tf.placeholder(tf.float64, name='alpha_T')
+    with tf.name_scope('hidden_threshold_1'):
+        calculate_new_hidden_node_1_threshold = zeta - Lambda * tf.matmul(x_k_placeholder, alpha_T_placeholder)
+    with tf.name_scope('hidden_threshold_2'):
+        calculate_new_hidden_node_2_threshold = zeta + Lambda * tf.matmul(x_k_placeholder, alpha_T_placeholder)
 
-# calculate new output weight
-y_k_minus_output_placeholder = tf.placeholder(tf.float64)
-two = tf.cast(2.0, tf.float64)
-calculate_new_output_weight = y_k_minus_output_placeholder / (two * tf.cast(tf.tanh(zeta), tf.float64))
+with tf.name_scope('calculate_new_output_weight'):
+    # calculate new output weight
+    y_k_minus_output_placeholder = tf.placeholder(tf.float64, name='y_k_minus_output')
+    two = tf.cast(2.0, tf.float64, name='2')
+    calculate_new_output_weight = y_k_minus_output_placeholder / (two * tf.cast(tf.tanh(zeta), tf.float64))
 
-tool_graph = tf.Graph()
-with tool_graph.as_default():
-    tool_alpha = tf.placeholder(tf.float64)
-    tool_beta = tf.placeholder(tf.float64)
-    min_alpha = tf.reduce_min(tool_alpha)
-    max_beta = tf.reduce_max(tool_beta)
-    tool_init = tf.global_variables_initializer()
-tool_sess = tf.Session(graph=tool_graph)
-tool_sess.run([tool_init])
+# 要用到pruning再說
+# tool_graph = tf.Graph()
+# with tool_graph.as_default():
+#     tool_alpha = tf.placeholder(tf.float64)
+#     tool_beta = tf.placeholder(tf.float64)
+#     min_alpha = tf.reduce_min(tool_alpha)
+#     max_beta = tf.reduce_max(tool_beta)
+#     tool_init = tf.global_variables_initializer()
+# tool_sess = tf.Session(graph=tool_graph)
+# tool_sess.run([tool_init])
 
 # 如果想看所有default graph裡面的node 可以用下面這段code
 # for node in tf.get_default_graph().as_graph_def().node:
@@ -326,44 +334,58 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
 
             # create new graph & session
             with tf.Graph().as_default():  # Create a new graph, and make it the default.
-                # placeholders
-                x_placeholder = tf.placeholder(tf.float64)
-                y_placeholder = tf.placeholder(tf.float64)
+                with tf.name_scope('inputs'):
+                    # placeholders
+                    x_placeholder = tf.placeholder(tf.float64, name='x_input')
+                    y_placeholder = tf.placeholder(tf.float64, name='y_input')
 
-                # network architecture
-                output_threshold = tf.Variable(current_output_threshold)
-                output_weights = tf.Variable(new_output_weights)
-                hidden_thresholds = tf.Variable(new_hidden_thresholds)
-                hidden_weights = tf.Variable(new_hidden_weights)
+                with tf.name_scope('hidden_layer'):
+                    hidden_thresholds = tf.Variable(new_hidden_thresholds, name='hidden_threshold')
+                    hidden_weights = tf.Variable(new_hidden_weights, name='hidden_weight')
+                    hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
 
-                hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
-                output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
+                with tf.name_scope('output_layer'):
+                    # network architecture
+                    output_threshold = tf.Variable(current_output_threshold, name='output_threshold')
+                    output_weights = tf.Variable(new_output_weights, name='output_weight')
+                    output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
 
                 # learning goal & optimizer
-                average_squared_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
-                train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_squared_residual)
+                with tf.name_scope('loss'):
+                    average_squared_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
+                with tf.name_scope('train'):
+                    train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_squared_residual)
 
                 # saver
                 saver = tf.train.Saver()
 
-                # alpha_T的算法，會用在加hidden node的時候
-                beta_k_placeholder = tf.placeholder(tf.float64)
-                x_c_placeholder = tf.placeholder(tf.float64)
-                x_k_placeholder = tf.placeholder(tf.float64)
-                test = tf.sqrt(tf.reduce_sum(tf.square(beta_k_placeholder)))
-                alpha = tf.div(beta_k_placeholder, test)
-                alpha_T = tf.transpose(alpha)
-                Cal_table2 = tf.reduce_sum(tf.matmul(tf.subtract(x_c_placeholder, x_k_placeholder), alpha_T))
+                with tf.name_scope('calculate_alpha_T'):
+                    # alpha_T的算法，會用在加hidden node的時候
+                    beta_k_placeholder = tf.placeholder(tf.float64, name='beta_k')
+                    x_c_placeholder = tf.placeholder(tf.float64, name='x_c')
+                    x_k_placeholder = tf.placeholder(tf.float64, name='x_k')
+                    test = tf.sqrt(tf.reduce_sum(tf.square(beta_k_placeholder, name='square'), name='reduce_sum'),
+                                   name='sqrt')
+                    alpha = tf.div(beta_k_placeholder, test, name='alpha')
+                    alpha_T = tf.transpose(alpha, name='transpose')
+                    Cal_table2 = tf.reduce_sum(tf.matmul(tf.subtract(x_c_placeholder, x_k_placeholder), alpha_T),
+                                               name='test_alpha')
 
-                # new hidden node threshold的算法
-                alpha_T_placeholder = tf.placeholder(tf.float64)
-                calculate_new_hidden_node_1_threshold = zeta - Lambda * tf.matmul(x_k_placeholder, alpha_T_placeholder)
-                calculate_new_hidden_node_2_threshold = zeta + Lambda * tf.matmul(x_k_placeholder, alpha_T_placeholder)
+                with tf.name_scope('calculate_new_hidden_threshold'):
+                    # new hidden node threshold的算法
+                    alpha_T_placeholder = tf.placeholder(tf.float64, name='alpha_T')
+                    with tf.name_scope('hidden_threshold_1'):
+                        calculate_new_hidden_node_1_threshold = zeta - Lambda * tf.matmul(x_k_placeholder,
+                                                                                          alpha_T_placeholder)
+                    with tf.name_scope('hidden_threshold_2'):
+                        calculate_new_hidden_node_2_threshold = zeta + Lambda * tf.matmul(x_k_placeholder,
+                                                                                          alpha_T_placeholder)
 
-                # calculate new output weight
-                y_k_minus_output_placeholder = tf.placeholder(tf.float64)
-                two = tf.cast(2.0, tf.float64)
-                calculate_new_output_weight = y_k_minus_output_placeholder / (two * tf.cast(tf.tanh(zeta), tf.float64))
+                with tf.name_scope('calculate_new_output_weight'):
+                    # calculate new output weight
+                    y_k_minus_output_placeholder = tf.placeholder(tf.float64, name='y_k_minus_output')
+                    two = tf.cast(2.0, tf.float64, name='2')
+                    calculate_new_output_weight = y_k_minus_output_placeholder / (two * tf.cast(tf.tanh(zeta), tf.float64))
 
                 init = tf.global_variables_initializer()
                 sess = tf.Session()
@@ -629,7 +651,8 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
 training_process.close()
 
 # tf.train.SummaryWriter soon be deprecated, use following
-writer = tf.summary.FileWriter("logs/", sess.graph)
+writer = tf.summary.FileWriter("C:/logfile", sess.graph)
+writer.close()
 
 # train end, get NN status
 curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
