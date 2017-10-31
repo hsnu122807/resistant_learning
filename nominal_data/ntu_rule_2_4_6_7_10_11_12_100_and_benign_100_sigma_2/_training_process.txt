@@ -1,0 +1,730 @@
+-----stage: 420-----
+new training case can be classified without additional action.
+-----stage: 421-----
+new training case can be classified without additional action.
+-----stage: 422-----
+new training case can be classified without additional action.
+-----stage: 423-----
+new training case can be classified without additional action.
+-----stage: 424-----
+new training case can be classified without additional action.
+-----stage: 425-----
+new training case can be classified without additional action.
+-----stage: 426-----
+new training case can be classified without additional action.
+-----stage: 427-----
+new training case can be classified without additional action.
+-----stage: 428-----
+new training case can be classified without additional action.
+-----stage: 429-----
+new training case can be classified without additional action.
+-----stage: 430-----
+new training case can be classified without additional action.
+-----stage: 431-----
+new training case can be classified without additional action.
+-----stage: 432-----
+new training case can be classified without additional action.
+-----stage: 433-----
+new training case can be classified without additional action.
+-----stage: 434-----
+new training case can be classified without additional action.
+-----stage: 435-----
+new training case can be classified without additional action.
+-----stage: 436-----
+new training case can be classified without additional action.
+-----stage: 437-----
+new training case can be classified without additional action.
+-----stage: 438-----
+new training case can be classified without additional action.
+-----stage: 439-----
+new training case can be classified without additional action.
+-----stage: 440-----
+new training case can be classified without additional action.
+-----stage: 441-----
+new training case can be classified without additional action.
+-----stage: 442-----
+new training case can be classified without additional action.
+-----stage: 443-----
+new training case can be classified without additional action.
+-----stage: 444-----
+new training case can be classified without additional action.
+-----stage: 445-----
+new training case can be classified without additional action.
+-----stage: 446-----
+new training case can be classified without additional action.
+-----stage: 447-----
+new training case can be classified without additional action.
+-----stage: 448-----
+new training case can be classified without additional action.
+-----stage: 449-----
+new training case can be classified without additional action.
+-----stage: 450-----
+new training case can be classified without additional action.
+-----stage: 451-----
+new training case can be classified without additional action.
+-----stage: 452-----
+new training case can be classified without additional action.
+-----stage: 453-----
+new training case can be classified without additional action.
+-----stage: 454-----
+new training case can be classified without additional action.
+-----stage: 455-----
+new training case can be classified without additional action.
+-----stage: 456-----
+new training case can be classified without additional action.
+-----stage: 457-----
+new training case can be classified without additional action.
+-----stage: 458-----
+new training case can be classified without additional action.
+-----stage: 459-----
+new training case can be classified without additional action.
+-----stage: 460-----
+new training case can be classified without additional action.
+-----stage: 461-----
+new training case can be classified without additional action.
+-----stage: 462-----
+new training case can be classified without additional action.
+-----stage: 463-----
+new training case can be classified without additional action.
+-----stage: 464-----
+new training case can be classified without additional action.
+-----stage: 465-----
+new training case can be classified without additional action.
+-----stage: 466-----
+new training case can be classified without additional action.
+-----stage: 467-----
+new training case can be classified without additional action.
+-----stage: 468-----
+new training case can be classified without additional action.
+-----stage: 469-----
+new training case can be classified without additional action.
+-----stage: 470-----
+new training case can be classified without additional action.
+-----stage: 471-----
+new training case can be classified without additional action.
+-----stage: 472-----
+new training case can be classified without additional action.
+-----stage: 473-----
+new training case can be classified without additional action.
+-----stage: 474-----
+new training case can be classified without additional action.
+-----stage: 475-----
+new training case can be classified without additional action.
+-----stage: 476-----
+new training case can be classified without additional action.
+-----stage: 477-----
+new training case can be classified without additional action.
+-----stage: 478-----
+new training case can be classified without additional action.
+-----stage: 479-----
+new training case can be classified without additional action.
+-----stage: 480-----
+new training case can be classified without additional action.
+-----stage: 481-----
+new training case can be classified without additional action.
+-----stage: 482-----
+new training case can be classified without additional action.
+-----stage: 483-----
+new training case can be classified without additional action.
+-----stage: 484-----
+new training case can be classified without additional action.
+-----stage: 485-----
+new training case can be classified without additional action.
+-----stage: 486-----
+new training case can be classified without additional action.
+-----stage: 487-----
+new training case can be classified without additional action.
+-----stage: 488-----
+new training case can be classified without additional action.
+-----stage: 489-----
+new training case can be classified without additional action.
+-----stage: 490-----
+new training case can be classified without additional action.
+-----stage: 491-----
+new training case can be classified without additional action.
+-----stage: 492-----
+new training case can be classified without additional action.
+-----stage: 493-----
+new training case can be classified without additional action.
+-----stage: 494-----
+new training case can be classified without additional action.
+-----stage: 495-----
+new training case can be classified without additional action.
+-----stage: 496-----
+new training case can be classified without additional action.
+-----stage: 497-----
+new training case can be classified without additional action.
+-----stage: 498-----
+new training case can be classified without additional action.
+-----stage: 499-----
+new training case can be classified without additional action.
+-----stage: 500-----
+new training case can be classified without additional action.
+-----stage: 501-----
+new training case can be classified without additional action.
+-----stage: 502-----
+new training case can be classified without additional action.
+-----stage: 503-----
+new training case can be classified without additional action.
+-----stage: 504-----
+new training case can be classified without additional action.
+-----stage: 505-----
+new training case can be classified without additional action.
+-----stage: 506-----
+new training case can be classified without additional action.
+-----stage: 507-----
+new training case can be classified without additional action.
+-----stage: 508-----
+new training case can be classified without additional action.
+-----stage: 509-----
+new training case can be classified without additional action.
+-----stage: 510-----
+new training case can be classified without additional action.
+-----stage: 511-----
+new training case can be classified without additional action.
+-----stage: 512-----
+new training case can be classified without additional action.
+-----stage: 513-----
+new training case can be classified without additional action.
+-----stage: 514-----
+new training case can be classified without additional action.
+-----stage: 515-----
+new training case can be classified without additional action.
+-----stage: 516-----
+new training case can be classified without additional action.
+-----stage: 517-----
+new training case can be classified without additional action.
+-----stage: 518-----
+new training case can be classified without additional action.
+-----stage: 519-----
+new training case can be classified without additional action.
+-----stage: 520-----
+new training case can be classified without additional action.
+-----stage: 521-----
+new training case can be classified without additional action.
+-----stage: 522-----
+new training case can be classified without additional action.
+-----stage: 523-----
+new training case can be classified without additional action.
+-----stage: 524-----
+new training case can be classified without additional action.
+-----stage: 525-----
+new training case can be classified without additional action.
+-----stage: 526-----
+new training case can be classified without additional action.
+-----stage: 527-----
+new training case can be classified without additional action.
+-----stage: 528-----
+new training case can be classified without additional action.
+-----stage: 529-----
+new training case can be classified without additional action.
+-----stage: 530-----
+new training case can be classified without additional action.
+-----stage: 531-----
+new training case can be classified without additional action.
+-----stage: 532-----
+new training case can be classified without additional action.
+-----stage: 533-----
+new training case can be classified without additional action.
+-----stage: 534-----
+new training case can be classified without additional action.
+-----stage: 535-----
+new training case can be classified without additional action.
+-----stage: 536-----
+new training case can be classified without additional action.
+-----stage: 537-----
+new training case can be classified without additional action.
+-----stage: 538-----
+new training case can be classified without additional action.
+-----stage: 539-----
+new training case can be classified without additional action.
+-----stage: 540-----
+new training case can be classified without additional action.
+-----stage: 541-----
+new training case can be classified without additional action.
+-----stage: 542-----
+new training case can be classified without additional action.
+-----stage: 543-----
+new training case can be classified without additional action.
+-----stage: 544-----
+new training case can be classified without additional action.
+-----stage: 545-----
+new training case can be classified without additional action.
+-----stage: 546-----
+new training case can be classified without additional action.
+-----stage: 547-----
+new training case can be classified without additional action.
+-----stage: 548-----
+new training case can be classified without additional action.
+-----stage: 549-----
+new training case can be classified without additional action.
+-----stage: 550-----
+new training case can be classified without additional action.
+-----stage: 551-----
+new training case can be classified without additional action.
+-----stage: 552-----
+new training case can be classified without additional action.
+-----stage: 553-----
+new training case can be classified without additional action.
+-----stage: 554-----
+new training case can be classified without additional action.
+-----stage: 555-----
+new training case can be classified without additional action.
+-----stage: 556-----
+new training case can be classified without additional action.
+-----stage: 557-----
+new training case can be classified without additional action.
+-----stage: 558-----
+new training case can be classified without additional action.
+-----stage: 559-----
+new training case can be classified without additional action.
+-----stage: 560-----
+new training case can be classified without additional action.
+-----stage: 561-----
+new training case can be classified without additional action.
+-----stage: 562-----
+new training case can be classified without additional action.
+-----stage: 563-----
+new training case can be classified without additional action.
+-----stage: 564-----
+new training case can be classified without additional action.
+-----stage: 565-----
+new training case can be classified without additional action.
+-----stage: 566-----
+new training case can be classified without additional action.
+-----stage: 567-----
+new training case can be classified without additional action.
+-----stage: 568-----
+new training case can be classified without additional action.
+-----stage: 569-----
+new training case can be classified without additional action.
+-----stage: 570-----
+new training case can be classified without additional action.
+-----stage: 571-----
+new training case can be classified without additional action.
+-----stage: 572-----
+new training case can be classified without additional action.
+-----stage: 573-----
+new training case can be classified without additional action.
+-----stage: 574-----
+new training case can be classified without additional action.
+-----stage: 575-----
+new training case can be classified without additional action.
+-----stage: 576-----
+new training case can be classified without additional action.
+-----stage: 577-----
+new training case can be classified without additional action.
+-----stage: 578-----
+new training case can be classified without additional action.
+-----stage: 579-----
+new training case can be classified without additional action.
+-----stage: 580-----
+new training case can be classified without additional action.
+-----stage: 581-----
+new training case can be classified without additional action.
+-----stage: 582-----
+new training case can be classified without additional action.
+-----stage: 583-----
+new training case can be classified without additional action.
+-----stage: 584-----
+new training case can be classified without additional action.
+-----stage: 585-----
+new training case can be classified without additional action.
+-----stage: 586-----
+new training case can be classified without additional action.
+-----stage: 587-----
+new training case can be classified without additional action.
+-----stage: 588-----
+new training case can be classified without additional action.
+-----stage: 589-----
+new training case can be classified without additional action.
+-----stage: 590-----
+new training case can be classified without additional action.
+-----stage: 591-----
+new training case can be classified without additional action.
+-----stage: 592-----
+new training case can be classified without additional action.
+-----stage: 593-----
+new training case can be classified without additional action.
+-----stage: 594-----
+new training case can be classified without additional action.
+-----stage: 595-----
+new training case can be classified without additional action.
+-----stage: 596-----
+new training case can be classified without additional action.
+-----stage: 597-----
+new training case can be classified without additional action.
+-----stage: 598-----
+new training case can be classified without additional action.
+-----stage: 599-----
+new training case can be classified without additional action.
+-----stage: 600-----
+new training case can be classified without additional action.
+-----stage: 601-----
+new training case can be classified without additional action.
+-----stage: 602-----
+new training case can be classified without additional action.
+-----stage: 603-----
+new training case can be classified without additional action.
+-----stage: 604-----
+new training case can be classified without additional action.
+-----stage: 605-----
+new training case can be classified without additional action.
+-----stage: 606-----
+new training case can be classified without additional action.
+-----stage: 607-----
+new training case can be classified without additional action.
+-----stage: 608-----
+new training case can be classified without additional action.
+-----stage: 609-----
+new training case can be classified without additional action.
+-----stage: 610-----
+new training case can be classified without additional action.
+-----stage: 611-----
+new training case can be classified without additional action.
+-----stage: 612-----
+new training case can be classified without additional action.
+-----stage: 613-----
+new training case can be classified without additional action.
+-----stage: 614-----
+new training case can be classified without additional action.
+-----stage: 615-----
+new training case can be classified without additional action.
+-----stage: 616-----
+new training case can be classified without additional action.
+-----stage: 617-----
+new training case can be classified without additional action.
+-----stage: 618-----
+new training case can be classified without additional action.
+-----stage: 619-----
+new training case can be classified without additional action.
+-----stage: 620-----
+new training case can be classified without additional action.
+-----stage: 621-----
+new training case can be classified without additional action.
+-----stage: 622-----
+new training case can be classified without additional action.
+-----stage: 623-----
+new training case can be classified without additional action.
+-----stage: 624-----
+new training case can be classified without additional action.
+-----stage: 625-----
+new training case can be classified without additional action.
+-----stage: 626-----
+new training case can be classified without additional action.
+-----stage: 627-----
+new training case can be classified without additional action.
+-----stage: 628-----
+new training case can be classified without additional action.
+-----stage: 629-----
+new training case can be classified without additional action.
+-----stage: 630-----
+new training case can be classified without additional action.
+-----stage: 631-----
+new training case can be classified without additional action.
+-----stage: 632-----
+new training case can be classified without additional action.
+-----stage: 633-----
+new training case can be classified without additional action.
+-----stage: 634-----
+new training case can be classified without additional action.
+-----stage: 635-----
+new training case can be classified without additional action.
+-----stage: 636-----
+new training case can be classified without additional action.
+-----stage: 637-----
+new training case can be classified without additional action.
+-----stage: 638-----
+new training case can be classified without additional action.
+-----stage: 639-----
+new training case can be classified without additional action.
+-----stage: 640-----
+new training case can be classified without additional action.
+-----stage: 641-----
+new training case can be classified without additional action.
+-----stage: 642-----
+new training case can be classified without additional action.
+-----stage: 643-----
+new training case can be classified without additional action.
+-----stage: 644-----
+new training case can be classified without additional action.
+-----stage: 645-----
+new training case can be classified without additional action.
+-----stage: 646-----
+new training case can be classified without additional action.
+-----stage: 647-----
+new training case can be classified without additional action.
+-----stage: 648-----
+new training case can be classified without additional action.
+-----stage: 649-----
+new training case can be classified without additional action.
+-----stage: 650-----
+new training case can be classified without additional action.
+-----stage: 651-----
+new training case can be classified without additional action.
+-----stage: 652-----
+new training case can be classified without additional action.
+-----stage: 653-----
+new training case can be classified without additional action.
+-----stage: 654-----
+new training case can be classified without additional action.
+-----stage: 655-----
+new training case can be classified without additional action.
+-----stage: 656-----
+new training case can be classified without additional action.
+-----stage: 657-----
+new training case can be classified without additional action.
+-----stage: 658-----
+new training case can be classified without additional action.
+-----stage: 659-----
+new training case can be classified without additional action.
+-----stage: 660-----
+new training case can be classified without additional action.
+-----stage: 661-----
+new training case can be classified without additional action.
+-----stage: 662-----
+new training case can be classified without additional action.
+-----stage: 663-----
+new training case can be classified without additional action.
+-----stage: 664-----
+new training case can be classified without additional action.
+-----stage: 665-----
+new training case can be classified without additional action.
+-----stage: 666-----
+new training case can be classified without additional action.
+-----stage: 667-----
+new training case can be classified without additional action.
+-----stage: 668-----
+new training case can be classified without additional action.
+-----stage: 669-----
+new training case can be classified without additional action.
+-----stage: 670-----
+new training case can be classified without additional action.
+-----stage: 671-----
+new training case can be classified without additional action.
+-----stage: 672-----
+new training case can be classified without additional action.
+-----stage: 673-----
+new training case can be classified without additional action.
+-----stage: 674-----
+new training case can be classified without additional action.
+-----stage: 675-----
+new training case can be classified without additional action.
+-----stage: 676-----
+new training case can be classified without additional action.
+-----stage: 677-----
+new training case can be classified without additional action.
+-----stage: 678-----
+new training case can be classified without additional action.
+-----stage: 679-----
+new training case can be classified without additional action.
+-----stage: 680-----
+new training case can be classified without additional action.
+-----stage: 681-----
+new training case can be classified without additional action.
+-----stage: 682-----
+new training case can be classified without additional action.
+-----stage: 683-----
+new training case can be classified without additional action.
+-----stage: 684-----
+new training case can be classified without additional action.
+-----stage: 685-----
+new training case can be classified without additional action.
+-----stage: 686-----
+new training case can be classified without additional action.
+-----stage: 687-----
+new training case can be classified without additional action.
+-----stage: 688-----
+new training case can be classified without additional action.
+-----stage: 689-----
+new training case can be classified without additional action.
+-----stage: 690-----
+new training case can be classified without additional action.
+-----stage: 691-----
+new training case can be classified without additional action.
+-----stage: 692-----
+new training case can be classified without additional action.
+-----stage: 693-----
+new training case can be classified without additional action.
+-----stage: 694-----
+new training case can be classified without additional action.
+-----stage: 695-----
+new training case can be classified without additional action.
+-----stage: 696-----
+new training case can be classified without additional action.
+-----stage: 697-----
+new training case can be classified without additional action.
+-----stage: 698-----
+new training case can be classified without additional action.
+-----stage: 699-----
+new training case can be classified without additional action.
+-----stage: 700-----
+new training case can be classified without additional action.
+-----stage: 701-----
+new training case can be classified without additional action.
+-----stage: 702-----
+new training case can be classified without additional action.
+-----stage: 703-----
+new training case can be classified without additional action.
+-----stage: 704-----
+new training case can be classified without additional action.
+-----stage: 705-----
+new training case can be classified without additional action.
+-----stage: 706-----
+new training case can be classified without additional action.
+-----stage: 707-----
+new training case can be classified without additional action.
+-----stage: 708-----
+new training case can be classified without additional action.
+-----stage: 709-----
+new training case can be classified without additional action.
+-----stage: 710-----
+new training case can be classified without additional action.
+-----stage: 711-----
+new training case can be classified without additional action.
+-----stage: 712-----
+new training case can be classified without additional action.
+-----stage: 713-----
+new training case can be classified without additional action.
+-----stage: 714-----
+new training case can be classified without additional action.
+-----stage: 715-----
+new training case can be classified without additional action.
+-----stage: 716-----
+new training case can be classified without additional action.
+-----stage: 717-----
+new training case can be classified without additional action.
+-----stage: 718-----
+new training case can be classified without additional action.
+-----stage: 719-----
+new training case can be classified without additional action.
+-----stage: 720-----
+new training case can be classified without additional action.
+-----stage: 721-----
+new training case can be classified without additional action.
+-----stage: 722-----
+new training case can be classified without additional action.
+-----stage: 723-----
+new training case can be classified without additional action.
+-----stage: 724-----
+new training case can be classified without additional action.
+-----stage: 725-----
+new training case can be classified without additional action.
+-----stage: 726-----
+new training case can be classified without additional action.
+-----stage: 727-----
+new training case can be classified without additional action.
+-----stage: 728-----
+new training case can be classified without additional action.
+-----stage: 729-----
+new training case can be classified without additional action.
+-----stage: 730-----
+new training case can be classified without additional action.
+-----stage: 731-----
+new training case can be classified without additional action.
+-----stage: 732-----
+new training case can be classified without additional action.
+-----stage: 733-----
+new training case can be classified without additional action.
+-----stage: 734-----
+new training case can be classified without additional action.
+-----stage: 735-----
+new training case can be classified without additional action.
+-----stage: 736-----
+new training case can be classified without additional action.
+-----stage: 737-----
+new training case can be classified without additional action.
+-----stage: 738-----
+new training case can be classified without additional action.
+-----stage: 739-----
+new training case can be classified without additional action.
+-----stage: 740-----
+new training case can be classified without additional action.
+-----stage: 741-----
+new training case can be classified without additional action.
+-----stage: 742-----
+new training case can be classified without additional action.
+-----stage: 743-----
+new training case can be classified without additional action.
+-----stage: 744-----
+new training case can be classified without additional action.
+-----stage: 745-----
+new training case can be classified without additional action.
+-----stage: 746-----
+new training case can be classified without additional action.
+-----stage: 747-----
+new training case can be classified without additional action.
+-----stage: 748-----
+new training case can be classified without additional action.
+-----stage: 749-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 750-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 751-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 752-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 753-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 754-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 755-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 756-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 757-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 758-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 759-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.
+-----stage: 760-----
+new training case larger than epsilon, apply GradientDescent to change weights & thresholds.
+start BP.
+BP failed: after 3000 times training, residual still larger than tolerance.
+restore weights.
+add two hidden nodes.

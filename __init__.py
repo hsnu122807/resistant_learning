@@ -26,17 +26,30 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # # print(x_training_data)
 # # print(y_training_data)
 
+# # read data from file
+# rule = "10"
+# ntu = "3"
+# data_amount = "1250"
+# # light = "" or "_light"
+# light = ""
+# file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
+# file_output = "TensorFlow_output_for_" + data_amount
+# # file_name = file_input
+# x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
+# y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
+# # print(x_training_data)
+# # print(y_training_data)
+
 # read data from file
-rule = "22"
-ntu = "4"
-data_amount = "100"
-# light = "" or "_light"
-light = "_light"
-file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
-file_output = "TensorFlow_output_for_" + data_amount
+file_input = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_100"
+file_output = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_100_output"
 # file_name = file_input
-x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
+x_training_data = np.loadtxt(file_input + ".txt", dtype=str, delimiter=" ")
 y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
+# delete timestamp & convert type
+x_training_data = x_training_data[:, :x_training_data.shape[1]-1]
+x_training_data = np.ndarray.astype(x_training_data, float)
+# print(x_training_data.shape)
 # print(x_training_data)
 # print(y_training_data)
 
@@ -55,9 +68,10 @@ outlier_rate = 0.05
 # squared_residual_tolerance = 0.5
 zeta = 0.05
 Lambda = 10000
-sigma_multiplier = 1
+sigma_multiplier = 2
 
 file_name = file_input + "_sigma_" + str(sigma_multiplier)
+# file_name = file_input + "_sigma_" + str(sigma_multiplier) + "_wrong_10_label"
 
 # create folder to save training process
 new_path = r"{0}/".format(dir_path) + file_name
