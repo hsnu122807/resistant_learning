@@ -1,0 +1,15 @@
+learning_rate: 0.005
+input_node_amount: 52
+hidden_node_amount: 1
+output_node_amount: 1
+training_data_amount: 130
+sigma: [  1.02371755e-16]
+sigma_multiplier: 2
+envelope_width_epsilon: [  2.04743511e-16]
+outlier_rate: 5.0%
+average_loss_of_the_model: 3.07200640975e-31
+thinking_times_count: 0
+cramming_times_count: 0
+softening_thinking_times_count: 0
+pruning_success_times_count: 0
+total execution time: 3.5121188163757324 seconds
