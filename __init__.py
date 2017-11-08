@@ -8,7 +8,7 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-# # read data from file(test data)
+# # read fake data from file(test data)
 # data_amount = '100'
 # file_input = "tensorflow_binary_input_" + data_amount
 # file_output = "tensorflow_binary_output_" + data_amount
@@ -18,7 +18,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # # print(x_training_data)
 # # print(y_training_data)
 
-# # read data from file
+# # read maochi data from file
 # file_name = "traffic"
 # data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=",")
 # x_training_data = np.delete(data, 5, axis=1)
@@ -26,7 +26,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # # print(x_training_data)
 # # print(y_training_data)
 
-# # read data from file
+# # read ntu data from file
 # rule = "10"
 # ntu = "3"
 # data_amount = "1250"
@@ -40,16 +40,32 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # # print(x_training_data)
 # # print(y_training_data)
 
-# read data from file
-file_input = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_100"
-file_output = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_100_output"
-# file_name = file_input
-x_training_data = np.loadtxt(file_input + ".txt", dtype=str, delimiter=" ")
-y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
-# delete timestamp & convert type
-x_training_data = x_training_data[:, :x_training_data.shape[1]-1]
-x_training_data = np.ndarray.astype(x_training_data, float)
-# print(x_training_data.shape)
+# # read ntu nominal data from file
+# # file_input = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_100"
+# # file_output = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_100_output"
+# # file_input = r"nominal_data\ntu_rule_15_16_19_22_100_and_benign_100"
+# # file_output = r"nominal_data\ntu_rule_15_16_19_22_100_and_benign_100_output"
+# # file_input = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_700"
+# # file_output = r"nominal_data\ntu_rule_2_4_6_7_10_11_12_100_and_benign_700_output"
+# file_input = r"nominal_data\ntu_rule_15_16_19_22_100_and_benign_400"
+# file_output = r"nominal_data\ntu_rule_15_16_19_22_100_and_benign_400_output"
+# # file_name = file_input
+# x_training_data = np.loadtxt(file_input + ".txt", dtype=str, delimiter=" ")
+# y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
+# # delete timestamp & convert type
+# x_training_data = x_training_data[:, :x_training_data.shape[1]-1]
+# x_training_data = np.ndarray.astype(x_training_data, float)
+# # print(x_training_data)
+# # print(y_training_data)
+
+# read owl data from file
+owl_rule = "15"
+sample_amount = "40"
+file_name = r"19_owl_rules\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount
+file_input = file_name
+training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
+x_training_data = training_data[:, 1:]
+y_training_data = training_data[:, 0].reshape((-1, 1))
 # print(x_training_data)
 # print(y_training_data)
 
@@ -59,10 +75,10 @@ execute_start_time = time.time()
 input_node_amount = x_training_data.shape[1]
 hidden_node_amount = 1
 output_node_amount = 1
-learning_rate_eta = 0.005
+learning_rate_eta = 0.05
 
 # Parameters
-every_stage_max_thinking_times = 3000
+every_stage_max_thinking_times = 10000
 data_size = x_training_data.shape[0]
 outlier_rate = 0.05
 # squared_residual_tolerance = 0.5
