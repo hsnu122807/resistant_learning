@@ -3,6 +3,7 @@ import numpy as np
 import os
 
 # 我想實驗看看outlier得到的nn判斷準確度較高還是新生成的nn判斷準確度較高
+# 實驗結果: 有好有壞
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -47,19 +48,6 @@ for a in range(rule_arr.shape[0]):
         training_data_desire_output = training_data_result[:, 2]
         # # print(training_data_predict_output)
         # # print(training_data_desire_output.shape[0])
-        # not_outlier_data_amount = int(training_data_desire_output.shape[0] * 0.95)
-        # outliers_predict_output = training_data_predict_output[not_outlier_data_amount:]
-        # outliers_desire_output = training_data_desire_output[not_outlier_data_amount:]
-        # # print(outliers_predict_output)
-        # # print(outliers_desire_output)
-        # outlier_benign_count = 0
-        # outlier_malware_count = 0
-        # for i in range(outliers_desire_output.shape[0]):
-        #     if outliers_desire_output[i] == 1:
-        #         outlier_benign_count += 1
-        #     elif outliers_desire_output[i] == -1:
-        #         outlier_malware_count += 1
-        # # input("123")
 
         training_data_benign_count = 0
         training_data_malware_count = 0
@@ -179,6 +167,66 @@ for a in range(rule_arr.shape[0]):
         print("False Negative of Rule Testing Data: {0}/{1}".format(testing_data_malware_predict_wrong_count, testing_data_malware_count))
 
         result_file.writelines("pure bp neuron network" + "\n")
+        result_file.writelines("middle point: {0}".format(middle_point) + "\n")
+        result_file.writelines("False Positive of Benign Training Data: {0}/{1}".format(training_data_benign_count - training_data_benign_predict_correct_count, training_data_benign_count) + "\n")
+        result_file.writelines("False Negative of Rule Training Data: {0}/{1}".format(training_data_malware_count - training_data_malware_predict_correct_count, training_data_malware_count) + "\n")
+        result_file.writelines("False Positive of Benign Testing Data: {0}/{1}".format(testing_data_benign_predict_wrong_count, testing_data_benign_count) + "\n")
+        result_file.writelines("False Negative of Rule Testing Data: {0}/{1}".format(testing_data_malware_predict_wrong_count, testing_data_malware_count) + "\n")
+        result_file.writelines("\n")
+
+        ot = np.loadtxt(dir_target + r"\precise_classify_neuron_network_output_threshold.txt", dtype=float, delimiter=" ").reshape(1)
+        ow = np.loadtxt(dir_target + r"\precise_classify_neuron_network_output_neuron_weight.txt", dtype=float, delimiter=" ").reshape((-1, 1))
+        ht = np.loadtxt(dir_target + r"\precise_classify_neuron_network_hidden_threshold.txt", dtype=float, delimiter=" ").reshape((1, -1))
+        hw = np.loadtxt(dir_target + r"\precise_classify_neuron_network_hidden_neuron_weight.txt", dtype=float, delimiter=" ").reshape((-1, ht.shape[1]))
+
+        output_threshold = tf.Variable(ot, dtype=tf.float64)
+        output_weights = tf.Variable(ow, dtype=tf.float64)
+        hidden_thresholds = tf.Variable(ht, dtype=tf.float64)
+        hidden_weights = tf.Variable(hw, dtype=tf.float64)
+
+        hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
+        output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
+
+        init = tf.global_variables_initializer()
+        sess = tf.Session()
+        sess.run(init)
+
+        # predict_major_training_data = sess.run([output_layer], {x_placeholder: major_data_x})[0]
+        # alpha = min(predict_major_training_data[np.where(major_data_y == 1)])
+        # beta = max(predict_major_training_data[np.where(major_data_y == -1)])
+        # middle_point = (alpha + beta) / 2
+        precise_bp_nn_middle_points = np.array([14.5626493448, 9.19419337145, -0.736419494894, -0.716568977157, -59.3408258007, -2.14050741829, ], dtype=float)
+        middle_point = precise_bp_nn_middle_points[a]
+
+        file_name = r"19_owl_rules\owl_rule_" + rule + "_" + data_amount + "_and_benign_" + data_amount
+        training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
+        x_training_data = training_data[:, 1:]
+        y_training_data = training_data[:, 0].reshape((-1, 1))
+        predict_training_data = sess.run([output_layer], {x_placeholder: x_training_data})[0]
+        predict_training_data_benign_part = predict_training_data[np.where(y_training_data == 1)]
+        predict_training_data_mal_part = predict_training_data[np.where(y_training_data == -1)]
+
+        training_data_benign_count = predict_training_data_benign_part.shape[0]
+        training_data_malware_count = predict_training_data_mal_part.shape[0]
+        training_data_benign_predict_correct_count = predict_training_data_benign_part[np.where(predict_training_data_benign_part >= middle_point)].shape[0]
+        training_data_malware_predict_correct_count = predict_training_data_mal_part[np.where(predict_training_data_mal_part < middle_point)].shape[0]
+
+        predict_malware = sess.run([output_layer], {x_placeholder: malware_samples})[0]
+        testing_data_malware_count = predict_malware.shape[0] - training_data_malware_count
+        testing_data_malware_predict_wrong_count = predict_malware[np.where(predict_malware >= middle_point)].shape[0] - (training_data_malware_count - training_data_malware_predict_correct_count)
+
+        predict_benign = sess.run([output_layer], {x_placeholder: benign_samples})[0]
+        testing_data_benign_count = predict_benign.shape[0] - training_data_benign_count
+        testing_data_benign_predict_wrong_count = predict_benign[np.where(predict_benign < middle_point)].shape[0] - (training_data_benign_count - training_data_benign_predict_correct_count)
+
+        print("precise bp neuron network")
+        print("middle point: {0}".format(middle_point))
+        print("False Positive of Benign Training Data: {0}/{1}".format(training_data_benign_count - training_data_benign_predict_correct_count, training_data_benign_count))
+        print("False Negative of Rule Training Data: {0}/{1}".format(training_data_malware_count - training_data_malware_predict_correct_count, training_data_malware_count))
+        print("False Positive of Benign Testing Data: {0}/{1}".format(testing_data_benign_predict_wrong_count, testing_data_benign_count))
+        print("False Negative of Rule Testing Data: {0}/{1}".format(testing_data_malware_predict_wrong_count, testing_data_malware_count))
+
+        result_file.writelines("precise bp neuron network" + "\n")
         result_file.writelines("middle point: {0}".format(middle_point) + "\n")
         result_file.writelines("False Positive of Benign Training Data: {0}/{1}".format(training_data_benign_count - training_data_benign_predict_correct_count, training_data_benign_count) + "\n")
         result_file.writelines("False Negative of Rule Training Data: {0}/{1}".format(training_data_malware_count - training_data_malware_predict_correct_count, training_data_malware_count) + "\n")
