@@ -3,17 +3,18 @@ import numpy as np
 import os
 import sys
 
-input_file_name = sys.argv[1]
-# input_file_name = "owl範例輸入"
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-file_input = np.loadtxt(input_file_name+".txt", dtype=str, delimiter=" ")
+# input_file_name = sys.argv[1]
+# input_file_name = "owl範例輸入"
+input_file_name = "benign_samples"
+
+file_input = np.loadtxt(dir_path + r"\19_owl_rules\owl_"+input_file_name+".txt", dtype=str, delimiter=" ")
 file_input = file_input[:, :file_input.shape[1]-1]
 file_input = np.ndarray.astype(file_input, float)
 
 rule_arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=str)
-data_amount_arr = np.array([65, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 39, 100, 40, 100, 100, 100, 100], dtype=str)
+# data_amount_arr = np.array([65, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 39, 100, 40, 100, 100, 100, 100], dtype=str)
 
 # match_arr = np.array([False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], dtype=bool)
 # match_count_arr = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=int)
@@ -71,7 +72,7 @@ analyze_result = open(dir_path + r"\_"+input_file_name+".txt", 'w', encoding="ut
 match_str = ""
 for i in range(1, 20):
     if result[np.where(result == i)].shape[0] > 0:
-        match_str = match_str + rule_arr[i] + " "
+        match_str = match_str + rule_arr[i-1] + " "
 print("Malware "+input_file_name+" matches rule: "+match_str)
 analyze_result.writelines("Malware "+input_file_name+" matches rule: "+match_str+"\n")
 print("Malware "+input_file_name+" has "+str(file_input.shape[0])+" samples.")

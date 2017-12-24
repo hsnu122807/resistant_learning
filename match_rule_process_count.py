@@ -3,6 +3,8 @@ import numpy as np
 import os
 
 one_thousand_process = np.loadtxt(r"C:\Users\user\workspace\TextConvert\strace_serial_1000_no_label.txt", dtype=float, delimiter=" ")
+# one_thousand_process = np.loadtxt(r"C:\Users\user\workspace\TextConvert\owl_rule_19_no_time_stamp.txt", dtype=float, delimiter=" ")
+# print(one_thousand_process)
 # one_process = np.loadtxt(r"C:\Users\user\workspace\TextConvert\22222.txt", dtype=float, delimiter=" ")
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -18,13 +20,14 @@ process_count_arr = np.array([968, 1130, 1108, 1999, 526, 301, 1070, 1692, 3499,
 
 # outlier_nn_middle_points = np.array([-3.3306690738754696e-16, 2.220446049250313e-16, -0.016030912236322137, 6.661338147750939e-16, 0.08752958306485459, 0.014918628033723014, -0.009096145748517359, 8.881784197001252e-16, 0.07761139915735538, 0.08396791100440226, 0.07660890793388064, 0.0025727028824890086, 4.440892098500626e-16, 0.030557788678427067, 1.1102230246251565e-16, 0.011511971465850479, 0.07328191187593269, 0.0291074303229667, 0.09658108023346235], dtype=float)
 # pure_bp_nn_middle_points = np.array([-0.00925304221365969, 0.049664038673084665, 0.00543358815973527, 0.04527706488361377, -3.914154289574867e-08, 0.004459474342866865, 0.011152369159429187, -0.003276037424748357, 0.0065274181482253835, -0.0005318752219775069, -0.08023929513232791, -0.020556419659375935, 0.04926890515924176, 0.01007006491514012, 0.006514106445896228, 0.0037681614905770155, 0.0026998438852392503, 0.04891848470559562, -0.0004008563566469947], dtype=float)
-precise_bp_nn_middle_points = np.array([14.5626493448, 9.19419337145, -0.736419494894, -0.716568977157, -59.3408258007, -2.14050741829, ], dtype=float)
+# precise_bp_nn_middle_points = np.array([14.5626493448, 9.19419337145, -0.736419494894, -0.716568977157, -59.3408258007, -2.14050741829, ], dtype=float)
 
 for a in range(rule_arr.shape[0]):
     with tf.Graph().as_default():
         # x_placeholder = tf.placeholder(tf.float64)
         # x_placeholder1 = tf.placeholder(tf.float64)
-        x_placeholder2 = tf.placeholder(tf.float64)
+        # x_placeholder2 = tf.placeholder(tf.float64)
+        x_placeholder3 = tf.placeholder(tf.float64)
 
         rule = rule_arr[a]
         data_amount = data_amount_arr[a]
@@ -58,40 +61,54 @@ for a in range(rule_arr.shape[0]):
         # hidden_layer1 = tf.tanh(tf.add(tf.matmul(x_placeholder1, hidden_weights1), hidden_thresholds1))
         # output_layer1 = tf.add(tf.matmul(hidden_layer1, output_weights1), output_threshold1)
 
-        ot2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_output_threshold.txt", dtype=float,
-                         delimiter=" ").reshape(1)
-        ow2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_output_neuron_weight.txt", dtype=float,
-                         delimiter=" ").reshape((-1, 1))
-        ht2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_hidden_threshold.txt", dtype=float,
-                         delimiter=" ").reshape((1, -1))
-        hw2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_hidden_neuron_weight.txt", dtype=float,
-                         delimiter=" ").reshape((-1, ht2.shape[1]))
+        # ot2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_output_threshold.txt", dtype=float,
+        #                  delimiter=" ").reshape(1)
+        # ow2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_output_neuron_weight.txt", dtype=float,
+        #                  delimiter=" ").reshape((-1, 1))
+        # ht2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_hidden_threshold.txt", dtype=float,
+        #                  delimiter=" ").reshape((1, -1))
+        # hw2 = np.loadtxt(dir_target + r"\second_phase_classify_neuron_network_hidden_neuron_weight.txt", dtype=float,
+        #                  delimiter=" ").reshape((-1, ht2.shape[1]))
+        #
+        # output_threshold2 = tf.Variable(ot2, dtype=tf.float64)
+        # output_weights2 = tf.Variable(ow2, dtype=tf.float64)
+        # hidden_thresholds2 = tf.Variable(ht2, dtype=tf.float64)
+        # hidden_weights2 = tf.Variable(hw2, dtype=tf.float64)
+        #
+        # hidden_layer2 = tf.tanh(tf.add(tf.matmul(x_placeholder2, hidden_weights2), hidden_thresholds2))
+        # output_layer2 = tf.add(tf.matmul(hidden_layer2, output_weights2), output_threshold2)
+        #
+        # init = tf.global_variables_initializer()
+        # sess = tf.Session()
+        # sess.run(init)
 
-        output_threshold2 = tf.Variable(ot2, dtype=tf.float64)
-        output_weights2 = tf.Variable(ow2, dtype=tf.float64)
-        hidden_thresholds2 = tf.Variable(ht2, dtype=tf.float64)
-        hidden_weights2 = tf.Variable(hw2, dtype=tf.float64)
+        # x = tf.placeholder(tf.float64, name='x_placeholder')
+        W = tf.Variable(np.loadtxt(dir_path + r"\19_owl_rules\multiple_output_node_bp\weight.txt"), dtype=tf.float64, name='weight')
+        b = tf.Variable(np.loadtxt(dir_path + r"\19_owl_rules\multiple_output_node_bp\bias.txt"), dtype=tf.float64, name='bias')
+        y = tf.nn.softmax(tf.matmul(x_placeholder3, W) + b, name='predict_y')
 
-        hidden_layer2 = tf.tanh(tf.add(tf.matmul(x_placeholder2, hidden_weights2), hidden_thresholds2))
-        output_layer2 = tf.add(tf.matmul(hidden_layer2, output_weights2), output_threshold2)
+        prediction = tf.argmax(y, 1)
 
-        init = tf.global_variables_initializer()
-        sess = tf.Session()
-        sess.run(init)
+        sess = tf.InteractiveSession()
+        tf.global_variables_initializer().run()
 
         # result_file = open(dir_target + r"\one_thousand_process_classify_by_outlier_nn.txt", 'w')
         # result_file1 = open(dir_target + r"\one_thousand_process_classify_by_pure_bp_nn.txt", 'w')
-        result_file2 = open(dir_target + r"\one_thousand_process_classify_by_precise_bp_nn.txt", 'w')
+        # result_file2 = open(dir_target + r"\one_thousand_process_classify_by_precise_bp_nn.txt", 'w')
+        result_file3 = open(dir_target + r"\one_thousand_process_classify_by_softmax_nn.txt", 'w')
         start = 0
         # match_process_count = 0
         # match_process_count1 = 0
-        match_process_count2 = 0
+        # match_process_count2 = 0
+        match_process_count3 = 0
         # chrome_is_detect = False
         # filezilla_is_detect = False
         # chrome_is_detect1 = False
         # filezilla_is_detect1 = False
-        chrome_is_detect2 = False
-        filezilla_is_detect2 = False
+        # chrome_is_detect2 = False
+        # filezilla_is_detect2 = False
+        chrome_is_detect3 = False
+        filezilla_is_detect3 = False
 
         for i in range(process_count_arr.shape[0]):
             process_samples = one_thousand_process[start:start+process_count_arr[i]]
@@ -99,7 +116,8 @@ for a in range(rule_arr.shape[0]):
             #     print(process_samples[j])
             # predict_process = sess.run([output_layer], {x_placeholder: process_samples})[0]
             # predict_process1 = sess.run([output_layer1], {x_placeholder1: process_samples})[0]
-            predict_process2 = sess.run([output_layer2], {x_placeholder2: process_samples})[0]
+            # predict_process2 = sess.run([output_layer2], {x_placeholder2: process_samples})[0]
+            predict_process3 = sess.run([prediction], {x_placeholder3: process_samples})[0]
 
             # predict_malware_count = predict_process[np.where(predict_process < outlier_nn_middle_points[a])].shape[0]
             # result_file.writelines(process_name_arr[i] + ' match rate: {0}/{1}\n'.format(predict_malware_count, process_count_arr[i]))
@@ -107,8 +125,11 @@ for a in range(rule_arr.shape[0]):
             # predict_malware_count1 = predict_process1[np.where(predict_process1 < pure_bp_nn_middle_points[a])].shape[0]
             # result_file1.writelines(process_name_arr[i] + ' match rate: {0}/{1}\n'.format(predict_malware_count1, process_count_arr[i]))
 
-            predict_malware_count2 = predict_process2[np.where(predict_process2 < precise_bp_nn_middle_points[a])].shape[0]
-            result_file2.writelines(process_name_arr[i] + ' match rate: {0}/{1}\n'.format(predict_malware_count2, process_count_arr[i]))
+            # predict_malware_count2 = predict_process2[np.where(predict_process2 < precise_bp_nn_middle_points[a])].shape[0]
+            # result_file2.writelines(process_name_arr[i] + ' match rate: {0}/{1}\n'.format(predict_malware_count2, process_count_arr[i]))
+
+            predict_malware_count3 = predict_process3[np.where(predict_process3 == (a+1))].shape[0]
+            result_file3.writelines(process_name_arr[i] + ' match rate: {0}/{1}\n'.format(predict_malware_count3, process_count_arr[i]))
 
             start += process_count_arr[i]
 
@@ -126,12 +147,19 @@ for a in range(rule_arr.shape[0]):
             # elif i == 775 and predict_malware_count1 > 0:
             #     filezilla_is_detect1 = True
 
-            if predict_malware_count2 > 0 and i != 775 and i != 89:
-                match_process_count2 += 1
-            elif i == 89 and predict_malware_count2 > 0:
-                chrome_is_detect2 = True
-            elif i == 775 and predict_malware_count2 > 0:
-                filezilla_is_detect2 = True
+            # if predict_malware_count2 > 0 and i != 775 and i != 89:
+            #     match_process_count2 += 1
+            # elif i == 89 and predict_malware_count2 > 0:
+            #     chrome_is_detect2 = True
+            # elif i == 775 and predict_malware_count2 > 0:
+            #     filezilla_is_detect2 = True
+
+            if predict_malware_count3 > 0 and i != 775 and i != 89:
+                match_process_count3 += 1
+            elif i == 89 and predict_malware_count3 > 0:
+                chrome_is_detect3 = True
+            elif i == 775 and predict_malware_count3 > 0:
+                filezilla_is_detect3 = True
 
         # result_file.writelines('\nmalware process detect rate: {0}/998\n'.format(match_process_count))
         # if chrome_is_detect:
@@ -145,12 +173,19 @@ for a in range(rule_arr.shape[0]):
         # if filezilla_is_detect1:
         #     result_file1.writelines('filezilla was classify as malware.\n')
 
-        result_file2.writelines('\nmalware process detect rate: {0}/998\n'.format(match_process_count2))
-        if chrome_is_detect2:
-            result_file2.writelines('chrome was classify as malware.\n')
-        if filezilla_is_detect2:
-            result_file2.writelines('filezilla was classify as malware.\n')
+        # result_file2.writelines('\nmalware process detect rate: {0}/998\n'.format(match_process_count2))
+        # if chrome_is_detect2:
+        #     result_file2.writelines('chrome was classify as malware.\n')
+        # if filezilla_is_detect2:
+        #     result_file2.writelines('filezilla was classify as malware.\n')
+
+        result_file3.writelines('\nmalware process detect rate: {0}/998\n'.format(match_process_count3))
+        if chrome_is_detect3:
+            result_file3.writelines('chrome was classify as malware.\n')
+        if filezilla_is_detect3:
+            result_file3.writelines('filezilla was classify as malware.\n')
 
         # result_file.close()
         # result_file1.close()
-        result_file2.close()
+        # result_file2.close()
+        result_file3.close()
