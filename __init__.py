@@ -13,7 +13,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # file_input = "tensorflow_binary_input_" + data_amount
 # file_output = "tensorflow_binary_output_" + data_amount
 # file_name = file_input
-# x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ")
+# x_training_data = np.loadtxt(file_input + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
 # y_training_data = np.loadtxt(file_output + ".txt", dtype=float, delimiter=" ").reshape((-1, 1))
 # # print(x_training_data)
 # # print(y_training_data)
@@ -22,7 +22,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # file_name = "traffic"
 # data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=",")
 # x_training_data = np.delete(data, 5, axis=1)
-# y_training_data = np.delete(data, slice(0, 5), axis=1)
+# y_training_data = np.delete(data, slice(0, 5), axis=1).reshape((-1, 1))
 # # print(x_training_data)
 # # print(y_training_data)
 
@@ -59,8 +59,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # # print(y_training_data)
 
 # read owl data from file
-owl_rule = "15"
-sample_amount = "40"
+owl_rule = "16"
+sample_amount = "100"
 file_name = r"19_owl_rules\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount
 file_input = file_name
 training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
@@ -69,19 +69,28 @@ y_training_data = training_data[:, 0].reshape((-1, 1))
 # print(x_training_data)
 # print(y_training_data)
 
+# # read owl data from file
+# file_name = 'simulation_data_1'
+# file_input = file_name
+# training_data = np.loadtxt(file_name + ".csv", dtype=float, delimiter=",")
+# x_training_data = training_data[:, 0].reshape((-1, 1))
+# y_training_data = training_data[:, 1].reshape((-1, 1))
+# # print(x_training_data)
+# # print(y_training_data)
+
 execute_start_time = time.time()
 
 # Network Parameters
 input_node_amount = x_training_data.shape[1]
 hidden_node_amount = 1
 output_node_amount = 1
-learning_rate_eta = 0.05
+learning_rate_eta = 0.005
 
 # Parameters
-every_stage_max_thinking_times = 10000
+every_stage_max_thinking_times = 1000000
 data_size = x_training_data.shape[0]
 outlier_rate = 0.05
-# squared_residual_tolerance = 0.5
+# square_residual_tolerance = 0.5
 zeta = 0.05
 Lambda = 10000
 sigma_multiplier = 2
@@ -109,21 +118,15 @@ sess = tf.Session()
 
 with tf.name_scope('calculate_envelope_width'):
     # 算出envelope width: epsilon
-    # 這邊的意義可以再問一下蔡老師
-    # 用規劃求解算出誤差最小的模型[[X1],[X2],[X3],...,[Xm]]
     opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data, fast=False, name='solve_matrix'))
-    # print(opt)
     # 算出所有資料用此模型得到的輸出值
     opt_output = sess.run(tf.matmul(x_training_data, opt, name='matmul'))
-    # print(opt_output)
     # 輸出值減掉實際的y值後取絕對值，得到此模型的差的矩陣
     opt_distance = sess.run(tf.abs(opt_output - y_training_data, name='abs'))
-    # print(opt_distance)
     # 取得差矩陣的平均值(用不到)以及變異數
     mean, var = tf.nn.moments(tf.stack(opt_distance, name='stack'), axes=[0], name='get_var')
     # stander deviation(全體資料的線性迴歸的標準差)
     sigma = sess.run(tf.sqrt(var, name='sqrt'))
-    # print(sigma)
     # envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
     epsilon = sigma_multiplier * sigma
 
@@ -146,7 +149,7 @@ with tf.name_scope('calculate_first_slfn_weights'):
     # 對應給定的output weight & threshold，解hidden weight & threshold的聯立方程式
     desi_slice_x = x_training_data[:m+1]
     # 由於x原本只有m維，所以要加上1倍的threshold來變成m+1個變數，m+1筆資料，解方程式
-    hidden_node_threshold_vector = tf.ones([m + 1, 1], dtype=tf.float64)
+    hidden_node_threshold_vector = tf.ones([m + 1, 1], dtype=tf.float64, name='one')
     xc = sess.run(tf.concat(axis=1, values=[desi_slice_x, hidden_node_threshold_vector]))
     # print(xc.shape)
     # 使用tf.matrix_solve_ls做矩陣運算解聯立方程式得到hidden weight & threshold
@@ -173,9 +176,9 @@ with tf.name_scope('output_layer'):
 
 # learning goal & optimizer
 with tf.name_scope('loss'):
-    average_squared_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
+    average_square_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
 with tf.name_scope('train'):
-    train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_squared_residual)
+    train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_square_residual)
 
 # saver
 saver = tf.train.Saver()
@@ -231,11 +234,11 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
 
     # pick n data of smallest residual
     predict_y = sess.run([output_layer], {x_placeholder: x_training_data, y_placeholder: y_training_data})
-    squared_residuals = np.square(predict_y[0] - y_training_data)
-    # print(squared_residuals)
+    square_residuals = np.square(predict_y[0] - y_training_data)
+    # print(square_residuals)
     # concat residual & origin data, sort by residual, depart residual
     concat_x_and_y = np.concatenate((x_training_data, y_training_data), axis=1)
-    concat_residual_and_x_y = np.concatenate((squared_residuals, concat_x_and_y), axis=1)
+    concat_residual_and_x_y = np.concatenate((square_residuals, concat_x_and_y), axis=1)
     sort_result = concat_residual_and_x_y[np.argsort(concat_residual_and_x_y[:, 0])]
     x_training_data_sort_by_residual = np.delete(sort_result, (0, m + 1), axis=1)  # 去除0和m+1欄
     y_training_data_sort_by_residual = np.delete(sort_result, slice(0, m + 1), axis=1)  # 去除從0到m欄
@@ -256,11 +259,11 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     # print(predict_y[0])
     # print(current_stage_y_training_data)
     # print(np.square(current_stage_y_training_data-predict_y[0]))
-    current_stage_squared_residuals = np.square(current_stage_y_training_data - predict_y[0])
+    current_stage_square_residuals = np.square(current_stage_y_training_data - predict_y[0])
 
     # print(epsilon.shape)
-    # print(current_stage_squared_residuals.shape)
-    if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
+    # print(current_stage_square_residuals.shape)
+    if all(square_residual < epsilon ** 2 for square_residual in current_stage_square_residuals):
         print('new training case can be classified without additional action.')
         training_process.writelines('new training case can be classified without additional action.' + "\n")
     else:
@@ -271,15 +274,33 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
         training_process.writelines('start BP.' + "\n")
         bp_failed = False
         saver.save(sess, r"{0}/model.ckpt".format(dir_path))
+        last_max_squared_residual = 9999999
         for stage in range(every_stage_max_thinking_times):
             sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data,y_placeholder: current_stage_y_training_data})
             thinking_times_count += 1
 
             predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
-            current_stage_squared_residuals = np.square(current_stage_y_training_data - predict_y[0])
-            if all(squared_residual ** 2 < epsilon ** 2 for squared_residual in current_stage_squared_residuals):
-                print('BP {0} times, all this stage training data meet the condition squared residual^2 < epsilon^2, thinking success!!!'.format((stage+1)))
-                training_process.writelines('BP {0} times, all this stage training data meet the condition squared residual^2 < epsilon^2, thinking success!!!'.format((stage+1)) + "\n")
+            current_stage_square_residuals = np.square(current_stage_y_training_data - predict_y[0])
+            if stage % 500 == 0 and stage != 0:
+                current_stage_max_square_residual = max(current_stage_square_residuals)
+                print(current_stage_max_square_residual)
+                if current_stage_max_square_residual - last_max_squared_residual < -0.01 * current_stage_max_square_residual:
+                    last_max_squared_residual = current_stage_max_square_residual
+                else:
+                    bp_failed = True
+                    print('BP failed: after {0} times training, residual change too slow.'.format(
+                        (stage + 1)))
+                    training_process.writelines(
+                        'BP failed: after {0} times training, residual change too slow.'.format(
+                            (stage + 1)) + "\n")
+                    # MUST restore before cramming(因為調權重可能會讓先前的資料違反condition L)
+                    saver.restore(sess, r"{0}/model.ckpt".format(dir_path))
+                    print('restore weights.')
+                    training_process.writelines('restore weights.' + "\n")
+                    break
+            if all(square_residual < epsilon ** 2 for square_residual in current_stage_square_residuals):
+                print('BP {0} times, all this stage training data meet the condition square residual^2 < epsilon^2, thinking success!!!'.format((stage+1)))
+                training_process.writelines('BP {0} times, all this stage training data meet the condition square residual^2 < epsilon^2, thinking success!!!'.format((stage+1)) + "\n")
                 break
             else:
                 if stage == (every_stage_max_thinking_times - 1):
@@ -292,7 +313,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                     training_process.writelines('restore weights.' + "\n")
 
         if bp_failed:
-            # add two hidden nodes to make the new training case squared residual less than tolerance
+            # add two hidden nodes to make the new training case square residual less than tolerance
             print('add two hidden nodes')
             training_process.writelines('add two hidden nodes.' + "\n")
             cramming_times_count += 1
@@ -382,9 +403,9 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
 
                 # learning goal & optimizer
                 with tf.name_scope('loss'):
-                    average_squared_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
+                    average_square_residual = tf.reduce_mean(tf.reduce_sum(tf.square(y_placeholder - output_layer), reduction_indices=[1]))
                 with tf.name_scope('train'):
-                    train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_squared_residual)
+                    train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(average_square_residual)
 
                 # saver
                 saver = tf.train.Saver()
@@ -394,12 +415,10 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                     beta_k_placeholder = tf.placeholder(tf.float64, name='beta_k')
                     x_c_placeholder = tf.placeholder(tf.float64, name='x_c')
                     x_k_placeholder = tf.placeholder(tf.float64, name='x_k')
-                    test = tf.sqrt(tf.reduce_sum(tf.square(beta_k_placeholder, name='square'), name='reduce_sum'),
-                                   name='sqrt')
+                    test = tf.sqrt(tf.reduce_sum(tf.square(beta_k_placeholder, name='square'), name='reduce_sum'), name='sqrt')
                     alpha = tf.div(beta_k_placeholder, test, name='alpha')
                     alpha_T = tf.transpose(alpha, name='transpose')
-                    Cal_table2 = tf.reduce_sum(tf.matmul(tf.subtract(x_c_placeholder, x_k_placeholder), alpha_T),
-                                               name='test_alpha')
+                    Cal_table2 = tf.reduce_sum(tf.matmul(tf.subtract(x_c_placeholder, x_k_placeholder), alpha_T), name='test_alpha')
 
                 with tf.name_scope('calculate_new_hidden_threshold'):
                     # new hidden node threshold的算法
@@ -545,10 +564,10 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             #                                                    exam_output_threshold_var)
             #
             #                         # exam goal & optimizer
-            #                         exam_average_squared_residual = tf.reduce_mean(
+            #                         exam_average_square_residual = tf.reduce_mean(
             #                             tf.reduce_sum(tf.square(exam_y_holder - exam_output_layer), reduction_indices=[1]))
             #                         exam_train = tf.train.GradientDescentOptimizer(learning_rate_eta).minimize(
-            #                             exam_average_squared_residual)
+            #                             exam_average_square_residual)
             #                         exam_init = tf.global_variables_initializer()
             #
             #                         # saver
@@ -625,7 +644,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             #                         hidden_layer_before_tanh = exam_hidden_layer_before_tanh
             #                         hidden_layer = exam_hidden_layer
             #                         output_layer = exam_output_layer
-            #                         average_squared_residual = exam_average_squared_residual
+            #                         average_square_residual = exam_average_square_residual
             #                         train = exam_train
             #                         saver = exam_saver
             #                         # modify constant
@@ -668,7 +687,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             # #                                       tau_placeholder: tau_in_each_hidden_node})
             # #     np.savetxt(new_path + r"\output_threshold.txt", curr_output_threshold)
             # #
-            # #     curr_average_loss = sess.run([average_squared_residual],
+            # #     curr_average_loss = sess.run([average_square_residual],
             # #                                  {x_placeholder: x_training_data, y_placeholder: y_training_data,
             # #                                   tau_placeholder: tau_in_each_hidden_node})
             # #     file.writelines("average_loss_of_the_model: " + str(curr_average_loss) + "\n")
@@ -687,18 +706,18 @@ writer.close()
 # train end, get NN status
 curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
             [hidden_weights, hidden_thresholds,
-             output_weights, output_threshold, average_squared_residual,
+             output_weights, output_threshold, average_square_residual,
              output_layer],
             {x_placeholder: x_training_data, y_placeholder: y_training_data})
 predict_y = sess.run([output_layer],
                          {x_placeholder: x_training_data,
                           y_placeholder: y_training_data})
-squared_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
-# print(squared_residuals)
+square_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
+# print(square_residuals)
 # concat residual & origin data, sort by residual, depart residual
 concat_y_and_x = np.concatenate((y_training_data.reshape((data_size, output_node_amount)), x_training_data), axis=1)
 concat_predict_and_y_x = np.concatenate((predict_y[0], concat_y_and_x), axis=1)
-concat_residual_and_predict_x_y = np.concatenate((squared_residuals, concat_predict_and_y_x), axis=1)
+concat_residual_and_predict_x_y = np.concatenate((square_residuals, concat_predict_and_y_x), axis=1)
 sort_result = concat_residual_and_predict_x_y[np.argsort(concat_residual_and_predict_x_y[:, 0])]
 
 np.savetxt(new_path + r"\hidden_neuron_weight.txt", curr_hidden_neuron_weight)
