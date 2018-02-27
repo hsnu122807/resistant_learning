@@ -45,15 +45,15 @@ for i in range(all_major_samples.shape[0]):
     else:
         major_samples_arr = np.append(major_samples_arr, all_major_samples[i], axis=0)
 
-for i in range(1, 20):
+for i in range(8, 20):
 
     for j in range(all_major_samples.shape[0]):
         if j == 0:
-            current_stage_y = np.tile(100, all_major_samples[j].shape[0])
+            current_stage_y = np.tile(1, all_major_samples[j].shape[0])
         elif j == i:
-            current_stage_y = np.append(current_stage_y, np.tile(-100, all_major_samples[j].shape[0]), axis=0)
+            current_stage_y = np.append(current_stage_y, np.tile(-1, all_major_samples[j].shape[0]), axis=0)
         else:
-            current_stage_y = np.append(current_stage_y, np.tile(100, all_major_samples[j].shape[0]), axis=0)
+            current_stage_y = np.append(current_stage_y, np.tile(1, all_major_samples[j].shape[0]), axis=0)
     current_stage_y = current_stage_y.reshape(-1, 1)
 
     major_data_x_mal_part = np.arange(0)
@@ -61,8 +61,8 @@ for i in range(1, 20):
     # print(major_data_x)
     # print(major_data_y)
 
-    major_data_x_mal_part = major_samples_arr[np.where(current_stage_y == -100)[0]]
-    major_data_x_benign_part = major_samples_arr[np.where(current_stage_y == 100)[0]]
+    major_data_x_mal_part = major_samples_arr[np.where(current_stage_y == -1)[0]]
+    major_data_x_benign_part = major_samples_arr[np.where(current_stage_y == 1)[0]]
     # np.savetxt("___.txt", major_data_x_mal_part)
     # np.savetxt("____.txt", major_data_x_benign_part)
     # input(123)
@@ -70,15 +70,16 @@ for i in range(1, 20):
     execute_start_time = time.time()
 
     learning_rate_eta = 0.00001
+    learning_rate_eta = 0.0001
     # squared_residual_tolerance = 0.01
-    bp_times_limit = 50000
+    bp_times_limit = 5000000
 
     print('rule ' + owl_rules[i-1])
     dir_target = dir_path + r"\19_owl_rules\owl_rule_" + str(owl_rules[i-1]) + "_" + data_amount[i-1] + "_and_benign_" + data_amount[i-1] + "_sigma_" + sigma
 
     training_detail = open(dir_target + r"\precise_classify_neuron_network_detail.txt", 'w')
 
-    hidden_node_amount = 0
+    hidden_node_amount = 9
     bp_times_count = 0
     hidden_node_is_not_enough = True
     while hidden_node_is_not_enough:
@@ -87,18 +88,17 @@ for i in range(1, 20):
             x_placeholder = tf.placeholder(tf.float64)
             y_placeholder = tf.placeholder(tf.float64)
 
-            hw = tf.random_normal([major_data_x.shape[1], hidden_node_amount], dtype=tf.float64, mean=0, stddev=1)
-            ht = tf.random_normal([hidden_node_amount], dtype=tf.float64, mean=0, stddev=1)
-            ow = tf.random_normal([hidden_node_amount, major_data_y.shape[1]], dtype=tf.float64, mean=0, stddev=1)
-            ot = tf.random_normal([major_data_y.shape[1]], dtype=tf.float64, mean=0, stddev=1)
+            hw = tf.random_normal([major_samples_arr.shape[1], hidden_node_amount], dtype=tf.float64, mean=100, stddev=0.1)
+            ht = tf.random_normal([hidden_node_amount], dtype=tf.float64, mean=-100000, stddev=0.3)
+            ow = tf.random_normal([hidden_node_amount, major_data_y.shape[1]], dtype=tf.float64, mean=0, stddev=0.3)
+            ot = tf.random_normal([current_stage_y.shape[1]], dtype=tf.float64, mean=0, stddev=0.01)
 
             output_threshold = tf.Variable(ot, dtype=tf.float64)
             output_weights = tf.Variable(ow, dtype=tf.float64)
             hidden_thresholds = tf.Variable(ht, dtype=tf.float64)
             hidden_weights = tf.Variable(hw, dtype=tf.float64)
 
-            # hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
-            hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds)/1024)
+            hidden_layer = tf.tanh(tf.add(tf.matmul(x_placeholder, hidden_weights), hidden_thresholds))
             output_layer = tf.add(tf.matmul(hidden_layer, output_weights), output_threshold)
 
             average_squared_residual = tf.reduce_mean(
@@ -113,6 +113,7 @@ for i in range(1, 20):
             counter = 0
             # last_max_residual = 100000000.0
             last_alpha_minus_beta = -100000000.0
+            last_a_s = 1000000000.0
             bp_not_good_count = 0
             while can_not_classify:
                 # predict_y = sess.run([output_layer], {x_placeholder: major_samples_arr, y_placeholder: current_stage_y})
@@ -121,22 +122,37 @@ for i in range(1, 20):
 
                 predict_mal = sess.run([output_layer], {x_placeholder: major_data_x_mal_part})[0]
                 predict_benign = sess.run([output_layer], {x_placeholder: major_data_x_benign_part})[0]
+
                 alpha = min(predict_benign)[0]
                 beta = max(predict_mal)[0]
-                if (counter % 300) == 0:
+                if (counter % 500) == 0:
                     # print(current_stage_max_residual)
                     alpha_minus_beta = alpha - beta
-                    print('alpha: '+str(alpha)+'   beta: '+str(beta))
+                    a_s = sess.run([average_squared_residual], {x_placeholder: major_samples_arr, y_placeholder: current_stage_y})[0]
+                    # a_s = 0
+                    print('alpha: '+str(alpha)+'   beta: '+str(beta)+'    a-b: '+str(alpha_minus_beta)+'    square residual: '+str(a_s))
+                    # if alpha_minus_beta == 0:
+                    #     # 查看到底是什麼x讓兩個值出來會一樣
+                    #     alpha_x = major_data_x_benign_part[np.where(predict_benign == alpha)[0]]
+                    #     beta_x = major_data_x_mal_part[np.where(predict_mal == beta)[0]]
+                    #     np.savetxt('alpha_x.txt', alpha_x)
+                    #     np.savetxt('beta_x.txt', beta_x)
+                    #     print(alpha_x)
+                    #     print(beta_x)
+                    #     input(123)
                     if counter > bp_times_limit:
                         print('bp times larger than limit, ' + str(hidden_node_amount) + ' hidden node not enough, add another hidden node')
                         can_not_classify = False
-                    if (alpha_minus_beta - last_alpha_minus_beta) <= 0.0:
+                    # if (alpha_minus_beta - last_alpha_minus_beta) >= 0:
+                    # if last_a_s - a_s <= 1.0e-5:
+                    if last_a_s - a_s <= 1.0e-5:
                         bp_not_good_count += 1
                     else:
                         bp_not_good_count = 0
                         last_alpha_minus_beta = alpha_minus_beta
-                    if bp_not_good_count > 2:
-                        print('last_alpha_minus_beta > alpha_minus_beta, ' + str(
+                        last_a_s = a_s
+                    if bp_not_good_count > 3:
+                        print('bp效率不好, ' + str(
                             hidden_node_amount) + ' hidden node can not learning well, add another hidden node')
                         can_not_classify = False
 
@@ -180,11 +196,11 @@ for i in range(1, 20):
                         "total execution time: \n" + str(time.time() - execute_start_time) + " seconds" + "\n")
                     training_detail.close()
                 else:
-                    if hidden_node_amount > 300:
+                    if hidden_node_amount > 20:
                         print('rule ' + owl_rules[i-1]+' training failed.')
                         can_not_classify = False
                         hidden_node_is_not_enough = False
                     else:
                         bp_times_count += 1
                         counter += 1
-                        sess.run(train, feed_dict={x_placeholder: major_data_x, y_placeholder: major_data_y})
+                        sess.run(train, feed_dict={x_placeholder: major_samples_arr, y_placeholder: current_stage_y})

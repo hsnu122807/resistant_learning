@@ -7,15 +7,16 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 x_placeholder = tf.placeholder(tf.float64)
 # y_placeholder = tf.placeholder(tf.float64)
 
-rule = "19"
-ntu = "4"
-data_amount = "100"
+rule = "6"
+ntu = "3"
+data_amount = "1250"
 # light = "" or "_light"
-light = "_light"
-sigma = "1"
-file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"+"_sigma_"+sigma
+light = ""
+sigma = "2"
+file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"+"_sigma_" + sigma + "_wrong_10_label"
 # file_input = "TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
-dir_target = dir_path + r"\TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"
+dir_target = dir_path + r"\TensorFlow_input_detection_rule_"+rule+"_"+data_amount+"_and_ntu_"+ntu+"_benign_"+data_amount+light+"_no_label"+"_sigma_" + sigma + "_wrong_10_label"
+
 
 ot = np.loadtxt(dir_target+r"\output_threshold.txt", dtype=float, delimiter=" ").reshape(1)
 ow = np.loadtxt(dir_target+r"\output_neuron_weight.txt", dtype=float, delimiter=" ").reshape((-1, 1))
@@ -56,7 +57,7 @@ for i in range(training_data_desire_output.shape[0]):
         if training_data_predict_output[i] < 0:
             training_data_malware_predict_correct_count += 1
 
-testing_data_dir = r"C:\Users\Lee Chia Lun\workspace\TextConvert"
+testing_data_dir = r"C:\Users\user\workspace\TextConvert"
 malware_samples = np.loadtxt(testing_data_dir+r"\detection_rule_"+rule+"_samples"+light+"_no_label.txt", dtype=float, delimiter=" ")
 malware_samples_training_part = np.loadtxt(testing_data_dir+r"\detection_rule_"+rule+"_samples"+light+"_no_label.txt", dtype=float, delimiter=" ")
 if light == "":

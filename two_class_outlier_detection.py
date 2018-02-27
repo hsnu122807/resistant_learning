@@ -58,56 +58,103 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # # print(x_training_data)
 # # print(y_training_data)
 
-# # read owl data from file
-# owl_rule = "19"
-# sample_amount = "100"
-# file_name = r"19_owl_rules\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount
+# for owl in range(1, 20):
+    # # read owl data from file
+    # owl_rule = str(owl)
+    # sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
+    # sample_amount = sample_amount_arr[owl-1]
+    # file_name = r"19_owl_rules\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount
+    # file_input = file_name
+    # training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
+    # x_training_data = training_data[:, 1:]
+    # y_training_data = training_data[:, 0].reshape((-1, 1))
+    # x_training_data_mal_part = x_training_data[np.where(y_training_data == -1)[0]]
+    # x_training_data_benign_part = x_training_data[np.where(y_training_data == 1)[0]]
+    # y_training_data_mal_part = y_training_data[np.where(y_training_data == -1)[0]]
+    # y_training_data_benign_part = y_training_data[np.where(y_training_data == 1)[0]]
+    # # print(x_training_data)
+    # # print(y_training_data)
+
+    # # read owl data from file
+    # file_name = 'simulation_data_1'
+    # file_input = file_name
+    # training_data = np.loadtxt(file_name + ".csv", dtype=float, delimiter=",")
+    # x_training_data = training_data[:, 0].reshape((-1, 1))
+    # y_training_data = training_data[:, 1].reshape((-1, 1))
+    # # print(x_training_data)
+    # # print(y_training_data)
+
+# # read all owl data from file
+# owl_rule = str(owl)
+# file_name = r"19_owl_rules\owl_rule_" + owl_rule + "_all_training_data"
 # file_input = file_name
-# training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
+# training_data = np.loadtxt(file_name + ".txt", dtype=str, delimiter=" ")
+# training_data = training_data[:, :training_data.shape[1]-1]
+# training_data = np.ndarray.astype(training_data, float)
 # x_training_data = training_data[:, 1:]
 # y_training_data = training_data[:, 0].reshape((-1, 1))
-# # print(x_training_data)
-# # print(y_training_data)
-
-# # read owl data from file
-# file_name = 'simulation_data_1'
-# file_input = file_name
-# training_data = np.loadtxt(file_name + ".csv", dtype=float, delimiter=",")
-# x_training_data = training_data[:, 0].reshape((-1, 1))
-# y_training_data = training_data[:, 1].reshape((-1, 1))
+# x_training_data_mal_part = x_training_data[np.where(y_training_data == -1)[0]]
+# x_training_data_benign_part = x_training_data[np.where(y_training_data == 1)[0]]
+# y_training_data_mal_part = y_training_data[np.where(y_training_data == -1)[0]]
+# y_training_data_benign_part = y_training_data[np.where(y_training_data == 1)[0]]
 # # print(x_training_data)
 # # print(y_training_data)
 
 
-# for owl in range(7, 20):
+# for owl in range(1, 20):
 #     # read all owl data from file
 #     owl_rule = str(owl)
 #     file_name = r"19_owl_rules\owl_rule_" + owl_rule + "_all_training_data"
-#     file_input = file_name
+#
 #     training_data = np.loadtxt(file_name + ".txt", dtype=str, delimiter=" ")
-#     training_data = training_data[:, :training_data.shape[1]-1]
+#     training_data = training_data[:, :training_data.shape[1] - 1]
 #     training_data = np.ndarray.astype(training_data, float)
-#     x_training_data = training_data[:, 1:]
-#     y_training_data = training_data[:, 0].reshape((-1, 1))
-#     x_training_data_mal_part = x_training_data[np.where(y_training_data == -1)[0]]
-#     x_training_data_benign_part = x_training_data[np.where(y_training_data == 1)[0]]
-#     y_training_data_mal_part = y_training_data[np.where(y_training_data == -1)[0]]
-#     y_training_data_benign_part = y_training_data[np.where(y_training_data == 1)[0]]
+#     if owl == 1:
+#         all_training_data = training_data
+#     else:
+#         all_training_data = np.concatenate((all_training_data, training_data), axis=0)
+# # np.savetxt("3333333333.txt", all_training_data)
+# # input(123)
+# all_training_data = np.unique(all_training_data, axis=0)
+# x_training_data = all_training_data[:, 1:]
+# y_training_data = all_training_data[:, 0].reshape((-1, 1))
+# print(x_training_data.shape)
+# print(y_training_data.shape)
+# print(np.where(y_training_data == 1)[0].shape)
+# # input(123)
+# x_training_data_mal_part = x_training_data[np.where(y_training_data == -1)[0]]
+# x_training_data_benign_part = x_training_data[np.where(y_training_data == 1)[0]]
+# y_training_data_mal_part = y_training_data[np.where(y_training_data == -1)[0]]
+# y_training_data_benign_part = y_training_data[np.where(y_training_data == 1)[0]]
+# file_input = "all_rules_data"
 
-
-for owl in range(1, 20):
+sample_data_container = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19], dtype=object)
+for owl in range(0, 20):
     # read all owl data from file
-    owl_rule = str(owl)
-    file_name = r"19_owl_rules\owl_rule_" + owl_rule + "_all_training_data"
-
-    training_data = np.loadtxt(file_name + ".txt", dtype=str, delimiter=" ")
-    training_data = training_data[:, :training_data.shape[1]-1]
-    training_data = np.ndarray.astype(training_data, float)
-    if owl == 1:
-        all_training_data = training_data
+    if owl == 0:
+        file_name = r"19_owl_rules\no_duplicate_pattern_19_rules\benign_chrome_and_filezilla_no_duplicate_label_1_at_index_0"
+        training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
+        sample_quantity = 2164  # 1/10 sampling of malware samples
+        sample_data = training_data[:sample_quantity]
     else:
-        all_training_data = np.concatenate((all_training_data, training_data), axis=0)
-# np.savetxt("3333333333.txt", all_training_data)
+        owl_rule = str(owl)
+        file_name = r"19_owl_rules\no_duplicate_pattern_19_rules\rule_{0}_no_duplicate_with_label_-1_at_index_0".format(owl_rule)
+        training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
+        sample_data = training_data[:int(training_data.shape[0]/10)]
+    sample_data_container[owl] = sample_data
+    # print(int(training_data.shape[0]/10))
+    # sss += int(training_data.shape[0]/10)
+    # sample_data_container[owl] = training_data
+for i in range(1, 20):
+    if i == 1:
+        heads = sample_data_container[i][:2]
+        remains = sample_data_container[i][2:]
+    else:
+        heads = np.concatenate((heads, sample_data_container[i][:2]), axis=0)
+        remains = np.concatenate((remains, sample_data_container[i][2:]), axis=0)
+
+h_b = np.concatenate((heads, sample_data_container[0]), axis=0)
+all_training_data = np.concatenate((h_b, remains), axis=0)
 # input(123)
 x_training_data = all_training_data[:, 1:]
 y_training_data = all_training_data[:, 0].reshape((-1, 1))
@@ -115,7 +162,9 @@ x_training_data_mal_part = x_training_data[np.where(y_training_data == -1)[0]]
 x_training_data_benign_part = x_training_data[np.where(y_training_data == 1)[0]]
 y_training_data_mal_part = y_training_data[np.where(y_training_data == -1)[0]]
 y_training_data_benign_part = y_training_data[np.where(y_training_data == 1)[0]]
-file_input = "all_rules_data"
+mal_sample_amount = y_training_data_mal_part.shape[0]
+benign_sample_amount = y_training_data_benign_part.shape[0]
+file_input = "all_rules_data_sample_1_of_10_"
 
 execute_start_time = time.time()
 
@@ -123,19 +172,19 @@ execute_start_time = time.time()
 input_node_amount = x_training_data.shape[1]
 hidden_node_amount = 1
 output_node_amount = 1
-learning_rate_eta = 0.005
+learning_rate_eta = 0.0000005
 
 # Parameters
-every_stage_max_thinking_times = 10000
+every_stage_max_thinking_times = 10000000
 data_size = x_training_data.shape[0]
 outlier_rate = 0.05
 # square_residual_tolerance = 0.5
 zeta = 0.05
-Lambda = 10000
-sigma_multiplier = 2
+Lambda = 100000
 
-file_name = file_input + "_sigma_" + str(sigma_multiplier)
+# file_name = file_input + "_sigma_2"
 # file_name = file_input + "_sigma_" + str(sigma_multiplier) + "_wrong_10_label"
+file_name = file_input + "_bml_testing"
 
 # create folder to save training process
 new_path = r"{0}/".format(dir_path) + file_name
@@ -143,7 +192,7 @@ if not os.path.exists(new_path):
     os.makedirs(new_path)
 
 # create file to save training process
-training_process = open(new_path + r"\_training_process.txt", 'w')
+training_process_log = open(new_path + r"\_two_class_training_process.txt", 'w')
 
 # counters
 thinking_times_count = 0
@@ -155,24 +204,19 @@ pruning_success_times_count = 0
 sess = tf.Session()
 # sess.run(init)
 
-with tf.name_scope('calculate_envelope_width'):
-    # 算出envelope width: epsilon
-    opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data, fast=False, name='solve_matrix'))
-    # 算出所有資料用此模型得到的輸出值
-    opt_output = sess.run(tf.matmul(x_training_data, opt, name='matmul'))
-    # 輸出值減掉實際的y值後取絕對值，得到此模型的差的矩陣
-    opt_distance = sess.run(tf.abs(opt_output - y_training_data, name='abs'))
-    # 取得差矩陣的平均值(用不到)以及變異數
-    mean, var = tf.nn.moments(tf.stack(opt_distance, name='stack'), axes=[0], name='get_var')
-    # stander deviation(全體資料的線性迴歸的標準差)
-    sigma = sess.run(tf.sqrt(var, name='sqrt'))
-    # envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
-    epsilon = sigma_multiplier * sigma
-
-    if epsilon < 0.0000001:
-        epsilon = 0.0000001
-    elif epsilon > 0.9:
-        epsilon = 0.9
+# with tf.name_scope('calculate_envelope_width'):
+#     # 算出envelope width: epsilon
+#     opt = sess.run(tf.matrix_solve_ls(x_training_data, y_training_data, fast=False, name='solve_matrix'))
+#     # 算出所有資料用此模型得到的輸出值
+#     opt_output = sess.run(tf.matmul(x_training_data, opt, name='matmul'))
+#     # 輸出值減掉實際的y值後取絕對值，得到此模型的差的矩陣
+#     opt_distance = sess.run(tf.abs(opt_output - y_training_data, name='abs'))
+#     # 取得差矩陣的平均值(用不到)以及變異數
+#     mean, var = tf.nn.moments(tf.stack(opt_distance, name='stack'), axes=[0], name='get_var')
+#     # stander deviation(全體資料的線性迴歸的標準差)
+#     sigma = sess.run(tf.sqrt(var, name='sqrt'))
+#     # envelope width(可以調整幾倍的標準差e.g. 2*sigma是95%的資料)
+#     epsilon = sigma_multiplier * sigma
 
 with tf.name_scope('calculate_first_slfn_weights'):
     # 首先架構初始SLFN
@@ -187,6 +231,9 @@ with tf.name_scope('calculate_first_slfn_weights'):
     # print(first_slfn_output_threshold)
     desi_slice_y = y_training_data[:m+1]
     # print(desi_slice_y.shape)
+    # for i in range(desi_slice_y.shape[0]):
+    #     print(desi_slice_y[i])
+    # input(123)
     # 取得x經過運算後應該得到的hidden value(做tanh運算之前)
     yc = np.arctanh((desi_slice_y - first_slfn_output_threshold) / first_slfn_output_weight).reshape(m+1, 1)
     # print(yc.shape)
@@ -272,100 +319,201 @@ with tf.name_scope('calculate_new_output_weight'):
 
 # print(predict_y)
 # input('123')
+
+last_alpha = 1
+last_beta = -1
+
+concat_x_training_data = np.concatenate((x_training_data_mal_part, x_training_data_benign_part), axis=0)
+concat_y_training_data = np.concatenate((y_training_data_mal_part, y_training_data_benign_part), axis=0)
+concat_x_and_y = np.concatenate((concat_x_training_data, concat_y_training_data), axis=1)
+
 for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
+    # for n in range(2170, int(data_size * (1 - outlier_rate) + 1)):
     print('-----stage: ' + str(n) + '-----')
-    training_process.writelines('-----stage: ' + str(n) + '-----' + "\n")
+    training_process_log.writelines('-----stage: ' + str(n) + '-----' + "\n")
 
-    # pick n data of smallest residual
-    predict_y = sess.run([output_layer], {x_placeholder: x_training_data, y_placeholder: y_training_data})
-    square_residuals = np.square(predict_y[0] - y_training_data)
-    # print(square_residuals)
-    # concat residual & origin data, sort by residual, depart residual
-    concat_x_and_y = np.concatenate((x_training_data, y_training_data), axis=1)
-    concat_residual_and_x_y = np.concatenate((square_residuals, concat_x_and_y), axis=1)
-    sort_result = concat_residual_and_x_y[np.argsort(concat_residual_and_x_y[:, 0])]
-    x_training_data_sort_by_residual = np.delete(sort_result, (0, m + 1), axis=1)  # 去除0和m+1欄
-    y_training_data_sort_by_residual = np.delete(sort_result, slice(0, m + 1), axis=1)  # 去除從0到m欄
-    # print(concat_x_and_y)
-    # print(concat_residual_and_x_y)
-    # print(x_training_data_sort_by_residual)
-    # print(y_training_data_sort_by_residual)
+    # # pick n most fit data(distance) 作廢->改成維持local兩類距離最大值
+    # predict_y_mal_part = sess.run([output_layer], {x_placeholder: x_training_data_mal_part, y_placeholder: y_training_data_mal_part})[0]
+    # predict_y_benign_part = sess.run([output_layer], {x_placeholder: x_training_data_benign_part, y_placeholder: y_training_data_benign_part})[0]
+    # most_fit_mal_value = min(predict_y_mal_part)
+    # most_fit_benign_value = max(predict_y_benign_part)
+    # fit_value_mal_part = most_fit_benign_value - predict_y_mal_part
+    # fit_value_benign_part = predict_y_benign_part - most_fit_mal_value
+    #
+    # concat_predict_y = np.concatenate((predict_y_mal_part, predict_y_benign_part), axis=0)
+    # concat_fit_value = np.concatenate((fit_value_mal_part, fit_value_benign_part), axis=0)
+    #
+    # concat_xy_and_y_predict = np.concatenate((concat_x_and_y, concat_predict_y), axis=1)
+    # concat_fit_and_x_y_yp = np.concatenate((concat_fit_value, concat_xy_and_y_predict), axis=1)
+    # # sort fit value from big to small
+    # sort_result = np.flip(concat_fit_and_x_y_yp[np.argsort(concat_fit_and_x_y_yp[:, 0])], axis=0)
+    # # np.savetxt('sort_result.txt', sort_result)
+    # # take first n row of data,
+    # current_stage_data = sort_result[:n]
+    #
+    # current_stage_y_training_data = np.delete(np.delete(current_stage_data, slice(0, m+1), axis=1), 1, axis=1)  # 去除從0到m&m+2欄
+    # current_stage_y_predict = np.delete(current_stage_data, slice(0, m+2), axis=1)
+    # # print(current_stage_y_training_data)
+    # # print(current_stage_y_predict)
+    #
+    # alpha = min(current_stage_y_predict[np.where(current_stage_y_training_data == 1)[0]])[0]
+    # beta = max(current_stage_y_predict[np.where(current_stage_y_training_data == -1)[0]])[0]
+    # # print(alpha)
+    # # print(beta)
+    # print('alpha:' + str(alpha) + '   beta:' + str(beta))
 
-    # take first n row of data, this stage use these data to train the NN
-    current_stage_x_training_data = x_training_data_sort_by_residual[:n]
-    current_stage_y_training_data = y_training_data_sort_by_residual[:n]
-    # print(current_stage_x_training_data)
-    # print(current_stage_y_training_data)
+    # pick n most fit data(每挑一個都要維持alpha-beta的最大值)
+    predict_y_mal_part = sess.run([output_layer], {x_placeholder: x_training_data_mal_part, y_placeholder: y_training_data_mal_part})[0]
+    predict_y_benign_part = sess.run([output_layer], {x_placeholder: x_training_data_benign_part, y_placeholder: y_training_data_benign_part})[0]
+    min_mal_predict_value = min(predict_y_mal_part)
+    max_benign_predict_value = max(predict_y_benign_part)
+    close_to_most_mal_value_mal_part = predict_y_mal_part - min_mal_predict_value
+    close_to_most_benign_value_benign_part = max_benign_predict_value - predict_y_benign_part
 
-    # calculate (y - predict_y) ^ 2 and check the residuals are smaller than tolerance
-    predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
+    x_y_mal_part = np.concatenate((x_training_data_mal_part, y_training_data_mal_part), axis=1)
+    x_y_yp_mal_part = np.concatenate((x_y_mal_part, predict_y_mal_part), axis=1)
+    value_x_y_yp_mal_part = np.concatenate((close_to_most_mal_value_mal_part, x_y_yp_mal_part), axis=1)
+    value_x_y_yp_mal_part_sorted_by_value = value_x_y_yp_mal_part[np.argsort(value_x_y_yp_mal_part[:, 0])]
 
-    # print(predict_y[0])
-    # print(current_stage_y_training_data)
-    # print(np.square(current_stage_y_training_data-predict_y[0]))
-    current_stage_square_residuals = np.square(current_stage_y_training_data - predict_y[0])
+    x_y_benign_part = np.concatenate((x_training_data_benign_part, y_training_data_benign_part), axis=1)
+    x_y_yp_benign_part = np.concatenate((x_y_benign_part, predict_y_benign_part), axis=1)
+    value_x_y_yp_benign_part = np.concatenate((close_to_most_benign_value_benign_part, x_y_yp_benign_part), axis=1)
+    value_x_y_yp_benign_part_sorted_by_value = value_x_y_yp_benign_part[np.argsort(value_x_y_yp_benign_part[:, 0])]
 
-    # print(epsilon.shape)
-    # print(current_stage_square_residuals.shape)
-    if all(square_residual < epsilon ** 2 for square_residual in current_stage_square_residuals):
-        print('new training case can be classified without additional action.')
-        training_process.writelines('new training case can be classified without additional action.' + "\n")
+    mal_index = 0
+    benign_index = 0
+    last_pick_is_mal = True
+    while (mal_index + benign_index) < (n-2):
+        if mal_index == mal_sample_amount - 1:
+            benign_index += 1
+            last_pick_is_mal = False
+        elif benign_index == benign_sample_amount - 1:
+            mal_index += 1
+            last_pick_is_mal = True
+        else:
+            a = value_x_y_yp_benign_part_sorted_by_value[benign_index][value_x_y_yp_benign_part_sorted_by_value.shape[1]-1]
+            b = value_x_y_yp_mal_part_sorted_by_value[mal_index][value_x_y_yp_mal_part_sorted_by_value.shape[1]-1]
+            a_1 = value_x_y_yp_benign_part_sorted_by_value[benign_index+1][value_x_y_yp_benign_part_sorted_by_value.shape[1]-1]
+            b_1 = value_x_y_yp_mal_part_sorted_by_value[mal_index+1][value_x_y_yp_mal_part_sorted_by_value.shape[1]-1]
+            pick_mal_alpha_minus_beta_value = a - b_1
+            pick_benign_alpha_minus_beta_value = a_1 - b
+            if pick_mal_alpha_minus_beta_value > pick_benign_alpha_minus_beta_value:
+                mal_index += 1
+                last_pick_is_mal = True
+            else:
+                benign_index += 1
+                last_pick_is_mal = False
+
+    if last_pick_is_mal:
+        c_d_m = value_x_y_yp_mal_part_sorted_by_value[:mal_index]
+        c_d_b = value_x_y_yp_benign_part_sorted_by_value[:benign_index+1]
+        c_d_last = value_x_y_yp_mal_part_sorted_by_value[mal_index].reshape(1, -1)
+        temp_c_s_d = np.concatenate((c_d_m, c_d_b), axis=0)
+        current_stage_data = np.concatenate((temp_c_s_d, c_d_last), axis=0)
     else:
-        print('new training case larger than epsilon, apply GradientDescent to change weights & thresholds.')
-        training_process.writelines('new training case larger than epsilon, apply GradientDescent to change weights & thresholds.' + "\n")
+        c_d_m = value_x_y_yp_mal_part_sorted_by_value[:mal_index+1]
+        c_d_b = value_x_y_yp_benign_part_sorted_by_value[:benign_index]
+        c_d_last = value_x_y_yp_benign_part_sorted_by_value[benign_index].reshape(1, -1)
+        temp_c_s_d = np.concatenate((c_d_m, c_d_b), axis=0)
+        current_stage_data = np.concatenate((temp_c_s_d, c_d_last), axis=0)
+    # np.savetxt("_aaa_watch_current_stage_data.txt", current_stage_data)
+
+    current_stage_y_training_data = np.delete(np.delete(current_stage_data, slice(0, m+1), axis=1), 1, axis=1)  # 去除從0到m&m+2欄
+    current_stage_y_predict = np.delete(current_stage_data, slice(0, m+2), axis=1)
+    # print(current_stage_y_training_data)
+    # print(current_stage_y_predict)
+
+    alpha = min(current_stage_y_predict[np.where(current_stage_y_training_data == 1)[0]])[0]
+    beta = max(current_stage_y_predict[np.where(current_stage_y_training_data == -1)[0]])[0]
+    # print(alpha)
+    # print(beta)
+    print('alpha:' + str(alpha) + '   beta:' + str(beta))
+    training_process_log.writelines('alpha:' + str(alpha) + '   beta:' + str(beta))
+    if alpha > beta:
+        print('new training case can be classified without additional action.')
+        training_process_log.writelines('new training case can be classified without additional action.' + "\n")
+
+        last_alpha = alpha
+        last_beta = beta
+    else:
+        print('new training case violate condition L, apply GradientDescent to change weights & thresholds.')
+        training_process_log.writelines('new training case larger than epsilon, apply GradientDescent to change weights & thresholds.' + "\n")
         # BP
         print('start BP.')
-        training_process.writelines('start BP.' + "\n")
+        training_process_log.writelines('start BP.' + "\n")
         bp_failed = False
+
+        current_stage_x_training_data = np.delete(current_stage_data, (0, m + 1, m + 2), axis=1)  # 去除0和m+1和m+2欄
+        # print(current_stage_x_training_data)
+        # 找出違反condition L的training case是哪一種，並給予分類邊界，設為其學習目標
+        if last_pick_is_mal:
+            current_stage_learning_target = np.concatenate((np.tile([min_mal_predict_value], mal_index).reshape(-1, 1), np.tile([max_benign_predict_value], benign_index + 2).reshape(-1, 1)), axis=0)
+            current_stage_learning_target[n - 1] = last_beta
+        else:
+            current_stage_learning_target = np.concatenate((np.tile([min_mal_predict_value], mal_index+1).reshape(-1, 1), np.tile([max_benign_predict_value], benign_index+1).reshape(-1, 1)), axis=0)
+            current_stage_learning_target[n - 1] = last_alpha
+        # if last_alpha == alpha:
+        #     current_stage_learning_target[mal_index] = last_beta
+        # else:
+        #     current_stage_learning_target[n-1] = last_alpha
+
         saver.save(sess, r"{0}/model.ckpt".format(dir_path))
-        last_max_squared_residual = 9999999
+        last_alpha_minus_beta = -9999999
         for stage in range(every_stage_max_thinking_times):
-            sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data,y_placeholder: current_stage_y_training_data})
+            # if n < 4120:
+            #     bp_failed = True
+            #     break
+            sess.run(train, feed_dict={x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_learning_target})
             thinking_times_count += 1
 
-            predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
-            current_stage_square_residuals = np.square(current_stage_y_training_data - predict_y[0])
+            temp_predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_learning_target})[0]
+            # print(temp_predict_y)
+            temp_beta = max(temp_predict_y[np.where(current_stage_y_training_data == -1)[0]])
+            temp_alpha = min(temp_predict_y[np.where(current_stage_y_training_data == 1)[0]])
+            # print('temp alpha:' + str(temp_alpha) + '   temp beta:' + str(temp_beta))
+            # input(123)
             if stage % 500 == 0 and stage != 0:
-                current_stage_max_square_residual = max(current_stage_square_residuals)
-                print(current_stage_max_square_residual)
-                if current_stage_max_square_residual - last_max_squared_residual < -0.01 * current_stage_max_square_residual:
-                    last_max_squared_residual = current_stage_max_square_residual
+                temp_alpha_minus_beta = temp_alpha - temp_beta
+                print('temp alpha:' + str(temp_alpha) + '   temp beta:' + str(temp_beta))
+                print(temp_alpha_minus_beta)
+                if temp_alpha_minus_beta - last_alpha_minus_beta > 0.0:
+                    last_alpha_minus_beta = temp_alpha_minus_beta
                 else:
                     bp_failed = True
-                    print('BP failed: after {0} times training, residual change too slow.'.format(
+                    print('BP failed: after {0} times training, learning too slow.'.format(
                         (stage + 1)))
-                    training_process.writelines(
-                        'BP failed: after {0} times training, residual change too slow.'.format(
+                    training_process_log.writelines(
+                        'BP failed: after {0} times training, learning change too slow.'.format(
                             (stage + 1)) + "\n")
                     # MUST restore before cramming(因為調權重可能會讓先前的資料違反condition L)
                     saver.restore(sess, r"{0}/model.ckpt".format(dir_path))
                     print('restore weights.')
-                    training_process.writelines('restore weights.' + "\n")
+                    training_process_log.writelines('restore weights.' + "\n")
                     break
-            if all(square_residual < epsilon ** 2 for square_residual in current_stage_square_residuals):
-                print('BP {0} times, all this stage training data meet the condition square residual^2 < epsilon^2, thinking success!!!'.format((stage+1)))
-                training_process.writelines('BP {0} times, all this stage training data meet the condition square residual^2 < epsilon^2, thinking success!!!'.format((stage+1)) + "\n")
+            if temp_alpha > temp_beta:
+                print('BP {0} times, all this stage training data can be separated, thinking success!!!'.format((stage+1)))
+                training_process_log.writelines('BP {0} times, all this stage training data can be separated, thinking success!!!'.format((stage + 1)) + "\n")
                 break
             else:
                 if stage == (every_stage_max_thinking_times - 1):
                     bp_failed = True
-                    print('BP failed: after {0} times training, residual still larger than tolerance.'.format((stage + 1)))
-                    training_process.writelines('BP failed: after {0} times training, residual still larger than tolerance.'.format((stage + 1)) + "\n")
+                    print('BP failed: after {0} times training, all this stage training data cannot be separated.'.format((stage + 1)))
+                    training_process_log.writelines('BP failed: after {0} times training, all this stage training data cannot be separated.'.format((stage + 1)) + "\n")
                     # MUST restore before cramming(因為調權重可能會讓先前的資料違反condition L)
                     saver.restore(sess, r"{0}/model.ckpt".format(dir_path))
                     print('restore weights.')
-                    training_process.writelines('restore weights.' + "\n")
+                    training_process_log.writelines('restore weights.' + "\n")
 
         if bp_failed:
             # add two hidden nodes to make the new training case square residual less than tolerance
             print('add two hidden nodes')
-            training_process.writelines('add two hidden nodes.' + "\n")
+            training_process_log.writelines('add two hidden nodes.' + "\n")
             cramming_times_count += 1
             hidden_node_amount += 2
             # calculate relevant parameters
             # 取得現有的weight&threshold陣列
             current_hidden_weights, current_hidden_thresholds, current_output_weights, current_output_threshold = sess.run([hidden_weights, hidden_thresholds, output_weights, output_threshold], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
-            predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
+            # predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
             # print('current hidden weights:')
             # print(current_hidden_weights)
             # print('current hidden thresholds:')
@@ -380,7 +528,9 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             y_k = current_stage_y_training_data[n - 1:]
             # print(x_c.shape)
             # print(x_k.shape)
-            # input()
+            print(x_k)
+            print(y_k)
+            input(1)
 
             # calculate new hidden weight
             alpha_success = False
@@ -484,6 +634,70 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                 sess = tf.Session()
                 sess.run(init)
 
+                # pick n most fit data(每挑一個都要維持alpha-beta的最大值)
+                predict_y_mal_part = sess.run([output_layer], {x_placeholder: x_training_data_mal_part,
+                                                               y_placeholder: y_training_data_mal_part})[0]
+                predict_y_benign_part = sess.run([output_layer], {x_placeholder: x_training_data_benign_part,
+                                                                  y_placeholder: y_training_data_benign_part})[0]
+                min_mal_predict_value = min(predict_y_mal_part)
+                max_benign_predict_value = max(predict_y_benign_part)
+                close_to_most_mal_value_mal_part = predict_y_mal_part - min_mal_predict_value
+                close_to_most_benign_value_benign_part = max_benign_predict_value - predict_y_benign_part
+
+                x_y_mal_part = np.concatenate((x_training_data_mal_part, y_training_data_mal_part), axis=1)
+                x_y_yp_mal_part = np.concatenate((x_y_mal_part, predict_y_mal_part), axis=1)
+                value_x_y_yp_mal_part = np.concatenate((close_to_most_mal_value_mal_part, x_y_yp_mal_part), axis=1)
+                value_x_y_yp_mal_part_sorted_by_value = value_x_y_yp_mal_part[np.argsort(value_x_y_yp_mal_part[:, 0])]
+
+                x_y_benign_part = np.concatenate((x_training_data_benign_part, y_training_data_benign_part), axis=1)
+                x_y_yp_benign_part = np.concatenate((x_y_benign_part, predict_y_benign_part), axis=1)
+                value_x_y_yp_benign_part = np.concatenate((close_to_most_benign_value_benign_part, x_y_yp_benign_part), axis=1)
+                value_x_y_yp_benign_part_sorted_by_value = value_x_y_yp_benign_part[np.argsort(value_x_y_yp_benign_part[:, 0])]
+
+                mal_index = 0
+                benign_index = 0
+                while (mal_index + benign_index) < (n - 2):
+                    if mal_index == mal_sample_amount - 1:
+                        benign_index += 1
+                    elif benign_index == benign_sample_amount - 1:
+                        mal_index += 1
+                    else:
+                        a = value_x_y_yp_benign_part_sorted_by_value[benign_index][
+                            value_x_y_yp_benign_part_sorted_by_value.shape[1] - 1]
+                        b = value_x_y_yp_mal_part_sorted_by_value[mal_index][
+                            value_x_y_yp_mal_part_sorted_by_value.shape[1] - 1]
+                        a_1 = value_x_y_yp_benign_part_sorted_by_value[benign_index + 1][
+                            value_x_y_yp_benign_part_sorted_by_value.shape[1] - 1]
+                        b_1 = value_x_y_yp_mal_part_sorted_by_value[mal_index + 1][
+                            value_x_y_yp_mal_part_sorted_by_value.shape[1] - 1]
+                        pick_mal_alpha_minus_beta_value = a - b_1
+                        pick_benign_alpha_minus_beta_value = a_1 - b
+                        if pick_mal_alpha_minus_beta_value > pick_benign_alpha_minus_beta_value:
+                            mal_index += 1
+                        else:
+                            benign_index += 1
+
+                current_stage_data = np.concatenate((value_x_y_yp_mal_part_sorted_by_value[:mal_index + 1],
+                                                     value_x_y_yp_benign_part_sorted_by_value[:benign_index + 1]),
+                                                    axis=0)
+
+                current_stage_y_training_data = np.delete(np.delete(current_stage_data, slice(0, m + 1), axis=1), 1,
+                                                          axis=1)  # 去除從0到m&m+2欄
+                current_stage_y_predict = np.delete(current_stage_data, slice(0, m + 2), axis=1)
+                # print(current_stage_y_training_data)
+                # print(current_stage_y_predict)
+
+                alpha = min(current_stage_y_predict[np.where(current_stage_y_training_data == 1)[0]])[0]
+                beta = max(current_stage_y_predict[np.where(current_stage_y_training_data == -1)[0]])[0]
+                # print(alpha)
+                # print(beta)
+                print("after cramming:")
+                print('alpha:' + str(alpha) + '   beta:' + str(beta))
+                if alpha > beta:
+                    print('after add two hidden node, new training case is satisfy condition L')
+                else:
+                    print('Warning! After cramming, new training case is still violate condition L')
+
                 # # verify add hidden node effect
                 # predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data,
                 #                                       y_placeholder: current_stage_y_training_data})[0]
@@ -492,7 +706,7 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
                 # print('origin y:')
                 # print(current_stage_y_training_data)
 
-                print('after add hidden node, new training case is in envelope')
+
             #
             #             # softening
             #             # save variables
@@ -741,11 +955,11 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             # #     print("--- execution time: %s seconds ---" % (time.time() - execute_start_time))
 
 # close the recording file of training process
-training_process.close()
+training_process_log.close()
 
 # tf.train.SummaryWriter soon be deprecated, use following
-writer = tf.summary.FileWriter("C:/logfile", sess.graph)
-writer.close()
+# writer = tf.summary.FileWriter("C:/logfile", sess.graph)
+# writer.close()
 
 # train end, get NN status
 curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, curr_output_threshold, curr_average_loss, curr_output = sess.run(
@@ -753,38 +967,85 @@ curr_hidden_neuron_weight, curr_hidden_threshold, curr_output_neuron_weight, cur
              output_weights, output_threshold, average_square_residual,
              output_layer],
             {x_placeholder: x_training_data, y_placeholder: y_training_data})
-predict_y = sess.run([output_layer],
-                         {x_placeholder: x_training_data,
-                          y_placeholder: y_training_data})
-square_residuals = np.square(predict_y[0] - y_training_data.reshape((-1, 1)))
-# print(square_residuals)
-# concat residual & origin data, sort by residual, depart residual
-concat_y_and_x = np.concatenate((y_training_data.reshape((data_size, output_node_amount)), x_training_data), axis=1)
-concat_predict_and_y_x = np.concatenate((predict_y[0], concat_y_and_x), axis=1)
-concat_residual_and_predict_x_y = np.concatenate((square_residuals, concat_predict_and_y_x), axis=1)
-sort_result = concat_residual_and_predict_x_y[np.argsort(concat_residual_and_predict_x_y[:, 0])]
+# concat_predict_y = np.concatenate((predict_y_mal_part, predict_y_benign_part), axis=0)
+# concat_fit_value = np.concatenate((fit_value_mal_part, fit_value_benign_part), axis=0)
+# concat_xy_and_y_predict = np.concatenate((concat_x_and_y, concat_predict_y), axis=1)
+# concat_fit_and_x_y_yp = np.concatenate((concat_fit_value, concat_xy_and_y_predict), axis=1)
+# # sort fit value from big to small
+# sort_result = np.flip(concat_fit_and_x_y_yp[np.argsort(concat_fit_and_x_y_yp[:, 0])], axis=0)
+# alpha = min(current_stage_y_predict[np.where(current_stage_y_training_data == 1)[0]])[0]
+# beta = max(current_stage_y_predict[np.where(current_stage_y_training_data == -1)[0]])[0]
 
-np.savetxt(new_path + r"\hidden_neuron_weight.txt", curr_hidden_neuron_weight)
-np.savetxt(new_path + r"\hidden_threshold.txt", curr_hidden_threshold)
-np.savetxt(new_path + r"\output_neuron_weight.txt", curr_output_neuron_weight)
-np.savetxt(new_path + r"\output_threshold.txt", curr_output_threshold)
-np.savetxt(new_path + r"\training_data_residual_predict_output_desire_output_desire_input.txt", sort_result)
+predict_y_mal_part = sess.run([output_layer], {x_placeholder: x_training_data_mal_part, y_placeholder: y_training_data_mal_part})[0]
+predict_y_benign_part = sess.run([output_layer], {x_placeholder: x_training_data_benign_part, y_placeholder: y_training_data_benign_part})[0]
+min_mal_predict_value = min(predict_y_mal_part)
+max_benign_predict_value = max(predict_y_benign_part)
+close_to_most_mal_value_mal_part = predict_y_mal_part - min_mal_predict_value
+close_to_most_benign_value_benign_part = max_benign_predict_value - predict_y_benign_part
 
-file = open(new_path + r"\_training_detail.txt", 'w')
+x_y_mal_part = np.concatenate((x_training_data_mal_part, y_training_data_mal_part), axis=1)
+x_y_yp_mal_part = np.concatenate((x_y_mal_part, predict_y_mal_part), axis=1)
+value_x_y_yp_mal_part = np.concatenate((close_to_most_mal_value_mal_part, x_y_yp_mal_part), axis=1)
+value_x_y_yp_mal_part_sorted_by_value = value_x_y_yp_mal_part[np.argsort(value_x_y_yp_mal_part[:, 0])]
+
+x_y_benign_part = np.concatenate((x_training_data_benign_part, y_training_data_benign_part), axis=1)
+x_y_yp_benign_part = np.concatenate((x_y_benign_part, predict_y_benign_part), axis=1)
+value_x_y_yp_benign_part = np.concatenate((close_to_most_benign_value_benign_part, x_y_yp_benign_part), axis=1)
+value_x_y_yp_benign_part_sorted_by_value = value_x_y_yp_benign_part[np.argsort(value_x_y_yp_benign_part[:, 0])]
+
+mal_index = 0
+benign_index = 0
+while (mal_index + benign_index) < (n - 2):
+    if mal_index == mal_sample_amount - 1:
+        benign_index += 1
+    elif benign_index == benign_sample_amount - 1:
+        mal_index += 1
+    else:
+        a = value_x_y_yp_benign_part_sorted_by_value[benign_index][
+            value_x_y_yp_benign_part_sorted_by_value.shape[1] - 1]
+        b = value_x_y_yp_mal_part_sorted_by_value[mal_index][
+            value_x_y_yp_mal_part_sorted_by_value.shape[1] - 1]
+        a_1 = value_x_y_yp_benign_part_sorted_by_value[benign_index + 1][
+            value_x_y_yp_benign_part_sorted_by_value.shape[1] - 1]
+        b_1 = value_x_y_yp_mal_part_sorted_by_value[mal_index + 1][
+            value_x_y_yp_mal_part_sorted_by_value.shape[1] - 1]
+        pick_mal_alpha_minus_beta_value = a - b_1
+        pick_benign_alpha_minus_beta_value = a_1 - b
+        if pick_mal_alpha_minus_beta_value > pick_benign_alpha_minus_beta_value:
+            mal_index += 1
+        else:
+            benign_index += 1
+
+current_stage_data = np.concatenate((value_x_y_yp_mal_part_sorted_by_value[:mal_index + 1], value_x_y_yp_benign_part_sorted_by_value[:benign_index + 1]), axis=0)
+current_stage_y_training_data = np.delete(np.delete(current_stage_data, slice(0, m + 1), axis=1), 1, axis=1)  # 去除從0到m&m+2欄
+current_stage_y_predict = np.delete(current_stage_data, slice(0, m + 2), axis=1)
+alpha = min(current_stage_y_predict[np.where(current_stage_y_training_data == 1)[0]])[0]
+beta = max(current_stage_y_predict[np.where(current_stage_y_training_data == -1)[0]])[0]
+sort_result = np.concatenate((value_x_y_yp_mal_part_sorted_by_value, value_x_y_yp_benign_part_sorted_by_value), axis=0)
+
+np.savetxt(new_path + r"\two_class_hidden_neuron_weight.txt", curr_hidden_neuron_weight)
+np.savetxt(new_path + r"\two_class_hidden_threshold.txt", curr_hidden_threshold)
+np.savetxt(new_path + r"\two_class_output_neuron_weight.txt", curr_output_neuron_weight)
+np.savetxt(new_path + r"\two_class_output_threshold.txt", curr_output_threshold)
+np.savetxt(new_path + r"\two_class_training_data_fit_x_y_yp.txt", sort_result)
+
+file = open(new_path + r"\_two_class_training_detail.txt", 'w')
 file.writelines("learning_rate: " + str(learning_rate_eta) + "\n")
 file.writelines("input_node_amount: " + str(input_node_amount) + "\n")
 file.writelines("hidden_node_amount: " + str(hidden_node_amount) + "\n")
 file.writelines("output_node_amount: " + str(output_node_amount) + "\n")
 file.writelines("training_data_amount: " + str(data_size) + "\n")
-file.writelines("sigma: " + str(sigma) + "\n")
-file.writelines("sigma_multiplier: " + str(sigma_multiplier) + "\n")
-file.writelines("envelope_width_epsilon: " + str(epsilon) + "\n")
 file.writelines("outlier_rate: " + str(outlier_rate*100) + "%\n")
 file.writelines("average_loss_of_the_model: " + str(curr_average_loss) + "\n")
 file.writelines("thinking_times_count: " + str(thinking_times_count) + "\n")
 file.writelines("cramming_times_count: " + str(cramming_times_count) + "\n")
-file.writelines("softening_thinking_times_count: " + str(softening_thinking_times_count) + "\n")
-file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
+file.writelines("majority benign sample amount: " + str(benign_index) + "\n")
+file.writelines("majority malicious sample amount: " + str(mal_index) + "\n")
+file.writelines("alpha(min majority benign output): " + str(alpha) + "\n")
+file.writelines("beta(max majority malicious output): " + str(beta) + "\n")
+file.writelines("classify middle point((alpha+beta)/2): " + str((alpha+beta)/2) + "\n")
+# file.writelines("softening_thinking_times_count: " + str(softening_thinking_times_count) + "\n")
+# file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
 file.writelines("total execution time: " + str(time.time() - execute_start_time) + " seconds" + "\n")
 file.close()
 print("thinking times: %s" % thinking_times_count)
