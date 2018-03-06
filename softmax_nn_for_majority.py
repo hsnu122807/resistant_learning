@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import time
+import math
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 all_major_samples = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=object)
@@ -9,16 +10,26 @@ all_major_samples = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 
 
 for i in range(19):
     # print('rule '+owl_rules[i])
+    # # 舊的(改挑選機制前)
     # dir_target = dir_path + r"\19_owl_rules\owl_rule_"+str(i+1)+"_all_training_data_all"
-    dir_target = dir_path + r"\19_owl_rules\owl_rule_" + str(i + 1) + "_all_training_data_sigma_2"
+    # # 改挑選機制後全部
+    # dir_target = dir_path + r"\19_owl_rules\owl_rule_" + str(i + 1) + "_all_training_data_bml"
+    # 改挑選機制後抽樣
+    owl_rule = str(i+1)
+    sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
+    sample_amount = sample_amount_arr[i]
+    owl_19_dir = dir_path + r"\19_owl_rules"
+    dir_target = owl_19_dir + r"\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount+"_bml"
 
-    # training_data_result = np.loadtxt(dir_target+r"\two_class_training_data_fit_x_y_yp.txt")
-    # major_data_x = training_data_result[:int(training_data_result.shape[0] * 0.95), 1:53]
-    # major_data_y = training_data_result[:int(training_data_result.shape[0] * 0.95), 53].reshape((-1, 1))
+    training_data_result = np.loadtxt(dir_target+r"\two_class_training_data_fit_x_y_yp.txt")
+    major_data_x = training_data_result[:int(training_data_result.shape[0] * 0.95), 1:53]
+    major_data_y = training_data_result[:int(training_data_result.shape[0] * 0.95), 53].reshape((-1, 1))
 
-    training_data_result = np.loadtxt(dir_target + r"\training_data_residual_predict_output_desire_output_desire_input.txt")
-    major_data_x = training_data_result[:int(training_data_result.shape[0] * 0.95), 3:55]
-    major_data_y = training_data_result[:int(training_data_result.shape[0] * 0.95), 2].reshape((-1, 1))
+    # # envelope 挑選的majority
+    # dir_target = dir_path + r"\19_owl_rules\owl_rule_" + str(i + 1) + "_all_training_data_sigma_2"
+    # training_data_result = np.loadtxt(dir_target + r"\training_data_residual_predict_output_desire_output_desire_input.txt")
+    # major_data_x = training_data_result[:int(training_data_result.shape[0] * 0.95), 3:55]
+    # major_data_y = training_data_result[:int(training_data_result.shape[0] * 0.95), 2].reshape((-1, 1))
 
     # print(major_data_x.shape[0])
     # print(major_data_y.shape[0])
@@ -31,14 +42,16 @@ for i in range(19):
     else:
         all_major_samples[0] = np.append(all_major_samples[0], major_data_x_benign_part, axis=0)
 all_major_samples[0] = np.unique(all_major_samples[0], axis=0)
+print("benign training sample amount:")
 print(all_major_samples[0].shape)
 
-for d in range(20):
-    if d == 0:
-        np.savetxt("all_binary_majority_benign.txt", all_major_samples[d])
-    else:
-        np.savetxt("all_binary_majority_rule_"+str(d)+".txt", all_major_samples[d])
-# input(123)
+# # 存成檔案驗證正確性
+# for d in range(20):
+#     if d == 0:
+#         np.savetxt("all_binary_majority_benign.txt", all_major_samples[d])
+#     else:
+#         np.savetxt("all_binary_majority_rule_"+str(d)+".txt", all_major_samples[d])
+# # input(123)
 
 # for i in range(20):
 #     # print('rule '+owl_rules[i])
@@ -68,27 +81,34 @@ for i in range(all_major_samples.shape[0]):
     else:
         training_x = np.append(training_x, all_major_samples[i], axis=0)
         training_y = np.append(training_y, y_element_arr, axis=0)
+print("all training sample amount:")
 print(training_x.shape)
 # input(123)
 # training_x.shape == (24719, 52)
 # np.savetxt("_.txt", training_y.reshape(-1, 20))
 
-# dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_binary"
-dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_envelope"
+# dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_bml"
+dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_sampling_bml"
+# dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_envelope"
+
+# create folder to save training process
+if not os.path.exists(dir_save_result):
+    os.makedirs(dir_save_result)
+
 bp_times_count = 0
 with tf.Graph().as_default():
     with tf.name_scope('placeholder_x'):
         x = tf.placeholder(tf.float64, [training_x.shape[0], training_x.shape[1]], name='x_placeholder')
     with tf.name_scope('placeholder_y'):
         y_ = tf.placeholder(tf.float64, [training_y.shape[0], training_y.shape[1]], name='y_placeholder')
-    # W = tf.Variable(tf.zeros([training_x.shape[1], training_y.shape[1]], dtype=tf.float64), dtype=tf.float64, name='weight')
-    # b = tf.Variable(tf.zeros([training_y.shape[1]], dtype=tf.float64), dtype=tf.float64, name='bias')
+    W = tf.Variable(tf.zeros([training_x.shape[1], training_y.shape[1]], dtype=tf.float64), dtype=tf.float64, name='weight')
+    b = tf.Variable(tf.zeros([training_y.shape[1]], dtype=tf.float64), dtype=tf.float64, name='bias')
     # W = tf.Variable(np.loadtxt(dir_save_result + r"\weight.txt"), dtype=tf.float64, name='weight')
     # b = tf.Variable(np.loadtxt(dir_save_result + r"\bias.txt"), dtype=tf.float64, name='bias')
     # W = tf.Variable(np.loadtxt(dir_save_result + r"\24719_weight.txt"), dtype=tf.float64, name='weight')
     # b = tf.Variable(np.loadtxt(dir_save_result + r"\24719_bias.txt"), dtype=tf.float64, name='bias')
-    W = tf.Variable(np.loadtxt(dir_save_result + r"\two_class_weight.txt"), dtype=tf.float64, name='weight')
-    b = tf.Variable(np.loadtxt(dir_save_result + r"\two_class_bias.txt"), dtype=tf.float64, name='bias')
+    # W = tf.Variable(np.loadtxt(dir_save_result + r"\two_class_weight.txt"), dtype=tf.float64, name='weight')
+    # b = tf.Variable(np.loadtxt(dir_save_result + r"\two_class_bias.txt"), dtype=tf.float64, name='bias')
     y = tf.nn.softmax(tf.matmul(x, W) + b, name='predict_y')
 
     with tf.name_scope('cross_entropy'):
@@ -106,18 +126,18 @@ with tf.Graph().as_default():
     # last_execute_time = np.loadtxt(dir_save_result + r"\execute_time.txt")
     # last_times_count = np.loadtxt(dir_save_result + r"\24719_times_count.txt")
     # last_execute_time = np.loadtxt(dir_save_result + r"\24719_execute_time.txt")
-    last_times_count = np.loadtxt(dir_save_result + r"\two_class_times_count.txt")
-    last_execute_time = np.loadtxt(dir_save_result + r"\two_class_execute_time.txt")
-    # last_times_count = 0
-    # last_execute_time = 0
-    last_correct_rate = 0.923
+    # last_times_count = np.loadtxt(dir_save_result + r"\two_class_times_count.txt")
+    # last_execute_time = np.loadtxt(dir_save_result + r"\two_class_execute_time.txt")
+    last_times_count = 0
+    last_execute_time = 0
+    last_correct_rate = 1.0
     execute_start_time = time.time()
 
     # writer = tf.summary.FileWriter("C:/logfile", sess.graph)
     # writer.close()
     # input(123)
 
-    for i in range(10000000):
+    for i in range(1000000):
         sess.run(train_step, feed_dict={x: training_x, y_: training_y})
         correct_rate = sess.run(accuracy, feed_dict={x: training_x, y_: training_y})
         if correct_rate == 1:
@@ -141,6 +161,8 @@ with tf.Graph().as_default():
             break
         if i % 1000 == 0:
             loss = sess.run(cross_entropy, feed_dict={x: training_x, y_: training_y})
+            if math.isnan(loss):
+                break
             # loss = sess.run(average_squared_residual, feed_dict={x: training_x, y_: training_y})
             if last_loss > loss and correct_rate >= last_correct_rate:
                 current_W, current_b = sess.run([W, b], feed_dict={x: training_x, y_: training_y})

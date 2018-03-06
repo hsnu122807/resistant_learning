@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import time
+import matplotlib.pyplot as plt
 
 # one_thousand_process = np.loadtxt(r"C:\Users\user\workspace\TextConvert\strace_serial_1000_no_label.txt", dtype=float, delimiter=" ")
 #
@@ -127,23 +128,59 @@ import time
 #     m_p = np.unique(m_p, axis=0)
 #     np.savetxt(save_name, m_p)
 
-# 製作沒有重複pattern的benign
-# chrome=(1395, 53), filezilla=(1798, 53)
-save_name = r"19_owl_rules\no_duplicate_pattern_19_rules\benign_chrome_and_filezilla_no_duplicate_label_1_at_index_0.txt"
-file_name_benign = r"19_owl_rules\benign_chrome_sample.txt"
-training_data = np.loadtxt(file_name_benign, dtype=float, delimiter=" ")
-training_data = np.unique(training_data, axis=0)
-np.random.shuffle(training_data)
-b_c = training_data
-print(b_c.shape)
-file_name_benign = r"19_owl_rules\benign_filezilla_sample.txt"
-training_data = np.loadtxt(file_name_benign, dtype=float, delimiter=" ")
-training_data = np.unique(training_data, axis=0)
-np.random.shuffle(training_data)
-b_f = training_data
-print(b_f.shape)
-b = np.concatenate((b_c, b_f), axis=0)
-one = np.array([1])
-ones = np.tile(one, b.shape[0]).reshape(-1, 1)
-b = np.concatenate((ones, b), axis=1)
-np.savetxt(save_name, b)
+# # 製作沒有重複pattern的benign
+# # chrome=(1395, 53), filezilla=(1798, 53)
+# save_name = r"19_owl_rules\no_duplicate_pattern_19_rules\benign_chrome_and_filezilla_no_duplicate_label_1_at_index_0.txt"
+# file_name_benign = r"19_owl_rules\benign_chrome_sample.txt"
+# training_data = np.loadtxt(file_name_benign, dtype=float, delimiter=" ")
+# training_data = np.unique(training_data, axis=0)
+# np.random.shuffle(training_data)
+# b_c = training_data
+# print(b_c.shape)
+# file_name_benign = r"19_owl_rules\benign_filezilla_sample.txt"
+# training_data = np.loadtxt(file_name_benign, dtype=float, delimiter=" ")
+# training_data = np.unique(training_data, axis=0)
+# np.random.shuffle(training_data)
+# b_f = training_data
+# print(b_f.shape)
+# b = np.concatenate((b_c, b_f), axis=0)
+# one = np.array([1])
+# ones = np.tile(one, b.shape[0]).reshape(-1, 1)
+# b = np.concatenate((ones, b), axis=1)
+# np.savetxt(save_name, b)
+
+# # 快速讀出文件中的資料
+# for i in range(1, 20):
+#     start = 15  # 開始在第幾行 (min: 1)
+#     end = 15  # 結束在第幾行
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     owl_19_dir = dir_path + r"\19_owl_rules"
+#     print("rule {0}".format(i))
+#
+#     owl_rule = str(i)
+#
+#     sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
+#     sample_amount = sample_amount_arr[i-1]
+#     target_dir = r"\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount+"_bml"
+#
+#     # target_dir = r"\owl_rule_"+owl_rule+"_all_training_data_bml"
+#
+#     file = open(owl_19_dir + target_dir + r"\_two_class_training_detail.txt")
+#
+#     line_index = 0
+#     while line_index < end:
+#         line_index += 1
+#         line = file.readline()
+#         if not line:
+#             break
+#         if line_index >= start:
+#             print(line, end="")
+#         # if line_index == 8 or line_index == 9 or line_index == 15:
+#         #     print(line, end="")
+#         # if "classify middle point((alpha+beta)/2): " in line:
+#         #     a = float(line.replace("classify middle point((alpha+beta)/2): ", ""))
+#         #     print(a, end="")
+#     print("-"*15)
+
+a = np.arange(stop=0, start=10, step=-2, dtype=int)
+print(a)
