@@ -9,7 +9,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # input_file_name = "benign_samples"
 
 # dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_binary"
-dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_envelope"
+# dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_envelope"
+dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_all_bml"
+# dir_save_result = dir_path + r"\19_owl_rules\softmax_nn_sampling_bml"
 x = tf.placeholder(tf.float64, name='x_placeholder')
 W = tf.Variable(np.loadtxt(dir_save_result + r"\two_class_weight.txt"), dtype=tf.float64, name='weight')
 b = tf.Variable(np.loadtxt(dir_save_result + r"\two_class_bias.txt"), dtype=tf.float64, name='bias')
@@ -27,8 +29,8 @@ sample_amount = 0
 classify_as_benign_sample_amount = 0
 rule_match_amount_arr = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], dtype=int)
 
-DATA_DIR = r"C:\Users\user\Desktop\chifeng_data\benign_testing_data"
-# DATA_DIR = r"C:\Users\user\Desktop\chifeng_data\malware_testing_data"
+DATA_DIR = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\chi_fong_2851_benign_4763_mal_process\benign_testing_data"
+# DATA_DIR = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\chi_fong_2851_benign_4763_mal_process\malware_testing_data"
 for filename in os.listdir(DATA_DIR):
     file_amount_count += 1
     file_input = np.loadtxt(DATA_DIR+"/"+filename, dtype=str, delimiter=" ")

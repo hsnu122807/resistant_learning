@@ -3,68 +3,63 @@ import tensorflow as tf
 import numpy as np
 import time
 import os
+import pickle
+import random
 
-dir_path = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\mix_19_rules_binary_classification\bml"
+dir_path = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning"
 
 # 可能會手動調整的參數
-every_stage_max_thinking_times = 1
+every_stage_max_thinking_times = 10000
 outlier_rate = 0.05
-sampling_rate = 0.1
+sampling_rate = 0.5
 sampling_amount = 100
 sampling_by_rate = True  # if False: sampling by fix amount
-# analyze_result_save_dir_name = "all_rules_data_sample_all_bml_separate_benign_and_malicious"
-analyze_result_save_dir_name = "all_rules_data_sample_1_of_10_bml_separate_benign_and_malicious"
-# analyze_result_save_dir_name = "all_rules_data_sample_100_bml_separate_benign_and_malicious"
+analyze_result_save_dir_name = "distribution_data_sample_1_of_2_bml_len_900"
+# analyze_result_save_dir_name = "distribution_data_sample_100_bml_len_900"
 
-# 所有不重複pattern中抽樣分兩類
-training_data_container = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=object)
-testing_data_container = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=object)
-# 讀檔案並且shuffle
-for i in range(training_data_container.shape[0]):
-    if i == training_data_container.shape[0]-1:  # 讀benign file
-        # 這邊先用純benign的兩個process 可考慮加入其他被ghsom視為benign
-        data_dir_name = r"19_owl_rules\no_duplicate_pattern_19_rules\benign_chrome_and_filezilla_no_duplicate_label_1_at_index_0"
-        benign_data = np.loadtxt(data_dir_name + ".txt", dtype=float, delimiter=" ")
-        benign_data = np.unique(benign_data, axis=0)
-        np.random.shuffle(benign_data)
-        mal_sample_quantity = 0
-        for r in range(1, training_data_container.shape[0]):
-            mal_sample_quantity += training_data_container[r].shape[0]
-        if mal_sample_quantity > benign_data.shape[0]:
-            training_data_container[0] = benign_data[:benign_data.shape[0]]
-            testing_data_container[0] = benign_data[benign_data.shape[0]:]
-        else:
-            training_data_container[0] = benign_data[:mal_sample_quantity]
-            testing_data_container[0] = benign_data[mal_sample_quantity:]
+# 讀檔案並且random取
+DATA_DIR = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\chi_fong_2851_benign_4763_mal_process"
+# mal_file = open(DATA_DIR+r"\4763_mal_ghsom_distribution_dim_48.pickle", "rb")
+mal_file = open(DATA_DIR+r"\4763_mal_ghsom_distribution_dim_48_len_900.pickle", "rb")
+mal_diction = pickle.load(mal_file)
+mal_file.close()
+# benign_file = open(DATA_DIR+r"\4763_not_mal_random_ghsom_distribution_dim_48.pickle", "rb")
+# benign_file = open(DATA_DIR+r"\2851_benign_ghsom_distribution_dim_48.pickle", "rb")
+benign_file = open(DATA_DIR+r"\2851_benign_ghsom_distribution_dim_48_len_900.pickle", "rb")
+benign_diction = pickle.load(benign_file)
+benign_file.close()
+mal_data_amount = len(mal_diction)
+benign_data_amount = len(benign_diction)
+mal_keys = list(mal_diction)
+benign_keys = list(benign_diction)
+random.shuffle(mal_keys)
+random.shuffle(benign_keys)
+
+if sampling_by_rate:
+    mal_training_keys = mal_keys[:int(mal_data_amount*sampling_rate)]
+    mal_testing_keys = mal_keys[int(mal_data_amount*sampling_rate):]
+    benign_training_keys = benign_keys[:int(benign_data_amount*sampling_rate)]
+    benign_testing_keys = benign_keys[int(benign_data_amount*sampling_rate):]
+else:
+    mal_training_keys = mal_keys[:int(sampling_amount)]
+    mal_testing_keys = mal_keys[int(sampling_amount):]
+    benign_training_keys = benign_keys[:int(sampling_amount)]
+    benign_testing_keys = benign_keys[int(sampling_amount):]
+
+# 交疊兩類資料，first slfn計算對象的資料放在前m+1個，會盡量各半
+for i in range(len(mal_training_keys)):
+    mal_row = np.append([-1], mal_diction[mal_training_keys[i]]).reshape((-1, 49))
+
+    if i == 0:
+        all_training_data = mal_row
     else:
-        owl_rule = str(i+1)
-        data_dir_name = r"19_owl_rules\no_duplicate_pattern_19_rules\rule_{0}_no_duplicate_with_label_-1_at_index_0".format(owl_rule)
-        mal_data = np.loadtxt(data_dir_name + ".txt", dtype=float, delimiter=" ")
-        mal_data = np.unique(mal_data, axis=0)
-        np.random.shuffle(mal_data)
-        if sampling_by_rate:
-            training_data_container[i + 1] = mal_data[:int(mal_data.shape[0]*sampling_rate)]
-            testing_data_container[i + 1] = mal_data[int(mal_data.shape[0]*sampling_rate):]
-        else:
-            if sampling_amount > mal_data.shape[0]:
-                training_data_container[i + 1] = mal_data[:mal_data.shape[0]]
-                testing_data_container[i + 1] = mal_data[mal_data.shape[0]:]
-            else:
-                training_data_container[i + 1] = mal_data[:sampling_amount]
-                testing_data_container[i + 1] = mal_data[sampling_amount:]
-
-# 把要拿來當first slfn計算對象的資料放在前m+1個
-each_rule_take_amount = 2  # 初始slfn會拿19rule*2其餘benign
-for i in range(1, 20):
-    if i == 1:
-        heads = training_data_container[i][:each_rule_take_amount]
-        remains = training_data_container[i][each_rule_take_amount:]
-    else:
-        heads = np.concatenate((heads, training_data_container[i][:each_rule_take_amount]), axis=0)
-        remains = np.concatenate((remains, training_data_container[i][each_rule_take_amount:]), axis=0)
-
-h_b = np.concatenate((heads, training_data_container[0]), axis=0)
-all_training_data = np.concatenate((h_b, remains), axis=0)
+        all_training_data = np.concatenate((all_training_data, mal_row), axis=0)
+    if i < len(benign_training_keys):
+        benign_row = np.append([1], benign_diction[benign_training_keys[i]]).reshape((-1, 49))
+        all_training_data = np.concatenate((all_training_data, benign_row), axis=0)
+    # print(all_training_data)
+    # input(1)
+all_training_data.reshape((-1, 49))
 # input(123)
 x_training_data = all_training_data[:, 1:]
 y_training_data = all_training_data[:, 0].reshape((-1, 1))
@@ -82,7 +77,7 @@ execute_start_time = time.time()
 input_node_amount = x_training_data.shape[1]
 hidden_node_amount = 1
 output_node_amount = 1
-learning_rate_eta = 0.0000005
+learning_rate_eta = 0.01
 
 # Parameters
 data_size = x_training_data.shape[0]
@@ -225,9 +220,9 @@ print('alpha:' + str(alpha) + '   beta:' + str(beta) + "   (alpha - beta):" + st
 last_alpha = alpha
 last_beta = beta
 
-# concat_x_training_data = np.concatenate((x_training_data_mal_part, x_training_data_benign_part), axis=0)
-# concat_y_training_data = np.concatenate((y_training_data_mal_part, y_training_data_benign_part), axis=0)
-# concat_x_and_y = np.concatenate((concat_x_training_data, concat_y_training_data), axis=1)
+concat_x_training_data = np.concatenate((x_training_data_mal_part, x_training_data_benign_part), axis=0)
+concat_y_training_data = np.concatenate((y_training_data_mal_part, y_training_data_benign_part), axis=0)
+concat_x_and_y = np.concatenate((concat_x_training_data, concat_y_training_data), axis=1)
 
 for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     print('-----stage: ' + str(n) + '-----')
@@ -681,20 +676,11 @@ file.writelines("majority malicious sample amount: " + str(global_max_mal_index+
 file.writelines("alpha(min majority benign output): " + str(alpha) + "\n")
 file.writelines("beta(max majority malicious output): " + str(beta) + "\n")
 file.writelines("classify middle point((alpha+beta)/2): " + str((alpha+beta)/2) + "\n")
-file.writelines("potential anomaly amount: {0}(Benign)    {1}(Malware)\n".format(benign_data_sorted_outlier_part.shape[0], mal_data_sorted_outlier_part.shape[0]))
 file.writelines("total execution time: " + str(time.time() - execute_start_time) + " seconds" + "\n")
 if sampling_by_rate:
     file.writelines("sampling rate: {0}\n".format(sampling_rate))
 else:
     file.writelines("sampling amount: {0}\n".format(sampling_amount))
-file.writelines("training data amount in each rule: [")
-for i in range(training_data_container.shape[0]):
-    file.writelines("{0}, ".format(training_data_container[i].shape[0]))
-file.writelines("]\n")
-file.writelines("testing data in each rule: [")
-for i in range(testing_data_container.shape[0]):
-    file.writelines("{0}, ".format(testing_data_container[i].shape[0]))
-file.writelines("]\n")
 file.close()
 print("thinking times: %s" % thinking_times_count)
 print("hidden node: %s nodes" % hidden_node_amount)
@@ -705,22 +691,45 @@ middle_point = (alpha+beta)/2
 for i in range(2):
     if i == 0:
         file = open(new_path + r"\_training_data_analyze.txt", 'w')
+        for j in range(len(mal_training_keys)):
+            mal_raw = np.append([-1], mal_diction[mal_training_keys[j]]).reshape((-1, 49))
+            if j == 0:
+                mal_data = mal_row
+            else:
+                mal_data = np.concatenate((mal_data, mal_row), axis=0)
+            # print(all_training_data)
+            # input(1)
+        for j in range(len(benign_training_keys)):
+            benign_raw = np.append([1], benign_diction[benign_training_keys[j]]).reshape((-1, 49))
+            if j == 0:
+                benign_data = benign_row
+            else:
+                benign_data = np.concatenate((benign_data, benign_row), axis=0)
     elif i == 1:
         file = open(new_path + r"\_testing_data_analyze.txt", 'w')
-    for j in range(training_data_container.shape[0]):
-        if i == 0:
-            input_data = training_data_container[j]
-        elif i == 1:
-            input_data = testing_data_container[j]
-        x_input_data = input_data[:, 1:]
-        y_input_data = input_data[:, 0].reshape((-1, 1))
-        predict_y = sess.run([output_layer], {x_placeholder: x_input_data})[0]
-        if j == 0:
-            classify_as_benign_count = predict_y[np.where(predict_y >= middle_point)[0]].shape[0]
-            file.writelines("benign classification accuracy: {0}/{1}\n".format(classify_as_benign_count, x_input_data.shape[0]))
-        else:
-            classify_as_mal_count = predict_y[np.where(predict_y < middle_point)[0]].shape[0]
-            file.writelines("rule {0} classification accuracy: {1}/{2}\n".format(j, classify_as_mal_count, x_input_data.shape[0]))
+        for j in range(len(mal_testing_keys)):
+            mal_raw = np.append([-1], mal_diction[mal_testing_keys[j]]).reshape((-1, 49))
+            if j == 0:
+                mal_data = mal_row
+            else:
+                mal_data = np.concatenate((mal_data, mal_row), axis=0)
+        for j in range(len(benign_testing_keys)):
+            benign_raw = np.append([1], benign_diction[benign_testing_keys[j]]).reshape((-1, 49))
+            if j == 0:
+                benign_data = benign_row
+            else:
+                benign_data = np.concatenate((benign_data, benign_row), axis=0)
+
+    x_mal_input_data = mal_data[:, 1:]
+    x_benign_input_data = benign_data[:, 1:]
+    mal_input_predict_y = sess.run([output_layer], {x_placeholder: x_mal_input_data})[0]
+    benign_input_predict_y = sess.run([output_layer], {x_placeholder: x_benign_input_data})[0]
+
+    benign_classify_as_benign_count = benign_input_predict_y[np.where(benign_input_predict_y >= middle_point)[0]].shape[0]
+    file.writelines("false positive rate: {0}/{1}\n".format(x_benign_input_data.shape[0]-benign_classify_as_benign_count, x_benign_input_data.shape[0]))
+
+    mal_classify_as_mal_count = mal_input_predict_y[np.where(mal_input_predict_y < middle_point)[0]].shape[0]
+    file.writelines("false negative rate: {0}/{1}\n".format(x_mal_input_data.shape[0]-mal_classify_as_mal_count, x_mal_input_data.shape[0]))
 
     file.close()
 

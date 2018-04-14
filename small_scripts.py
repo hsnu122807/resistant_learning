@@ -1,8 +1,9 @@
 import tensorflow as tf
 import numpy as np
 import os
-import time
-import matplotlib.pyplot as plt
+import pickle
+# import time
+# import matplotlib.pyplot as plt
 
 # one_thousand_process = np.loadtxt(r"C:\Users\user\workspace\TextConvert\strace_serial_1000_no_label.txt", dtype=float, delimiter=" ")
 #
@@ -182,5 +183,107 @@ import matplotlib.pyplot as plt
 #         #     print(a, end="")
 #     print("-"*15)
 
-a = np.arange(stop=0, start=10, step=-2, dtype=int)
-print(a)
+# read chi-fon pickle file
+# import pickle
+# file = open("rnn_input.pickle", "rb")
+# diction = pickle.load(file)
+# print(len(diction))
+# aa = diction['01e27ef8a907a4477b1d641f1ee186b39cf52e9e5051538dc1238f2aa8bdc4e2'][0]
+# # print(aa)
+# for i in aa:
+#     print(i)
+# file.close()
+
+# a = np.zeros(10)
+# print(a)
+
+# 可以用來計算5%outlier的組成
+# for i in range(1, 20):
+#     start = 15  # 開始在第幾行 (min: 1)
+#     end = 15  # 結束在第幾行
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     owl_19_dir = dir_path + r"\19_owl_rules"
+#     print('-'*15)
+#     print("rule {0}".format(i))
+#
+#     owl_rule = str(i)
+#
+#     sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
+#     sample_amount = sample_amount_arr[i-1]
+#     # target_dir = owl_19_dir+r"\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount+"_bml"
+#     target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_" + sample_amount + "_and_benign_" + sample_amount + "_sigma_2"
+#
+#     # target_dir = r"\owl_rule_"+owl_rule+"_all_training_data_bml"
+#     # target_dir = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\distribution_data_sample_1_of_10_bml"
+#     # target_dir = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\distribution_data_sample_1_of_2_bml"
+#     # target_dir = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\distribution_data_sample_all_bml"
+# # target_dir = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\all_rules_data_sample_all_bml_separate_benign_and_malicious"
+#     file = open(target_dir + r"\two_class_training_data_fit_x_y_yp.txt")
+#
+#     line_index = 0
+#     mal_count = 0
+#     benign_count = 0
+#     while 1:
+#
+#         line = file.readline()
+#         if not line:
+#             break
+#         # temp_ls = line.split(" ")
+#         # print(temp_ls[-2], end="")
+#         line_index += 1
+#     # print(line_index)
+#     # print("-"*15)
+#     file.close()
+#
+#     file = open(target_dir + r"\two_class_training_data_fit_x_y_yp.txt")
+#     majority_index = int(line_index * 0.95)
+#     print(majority_index)
+#     line_index = 0
+#     while 1:
+#
+#         line = file.readline()
+#         if not line:
+#             break
+#         # temp_ls = line.split(" ")
+#         # print(temp_ls[-2], end="")
+#         if line_index >= majority_index:
+#             temp_ls = line.split(" ")
+#             # print(temp_ls[-2])
+#             if temp_ls[-2] == '1.000000000000000000e+00':
+#                 benign_count += 1
+#             if temp_ls[-2] == '-1.000000000000000000e+00':
+#                 mal_count += 1
+#         line_index += 1
+#     file.close()
+#     print('anomaly: B({0})   M({1})'.format(benign_count, mal_count))
+
+
+# 把double轉int
+dir_name = r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_malware_2_benign'
+save_dir = r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_m_2_b'
+# save_dict = {}
+result_file = open(save_dir + r"/998_malware_2_benign", 'w')
+result_file.writelines("52" + "\n")
+result_file.writelines("rt, tgkill, read, ppoll, futex, write, ioctl, exit, close, SIGTERM, poll, munmap, exited, fcntl, mmap, accept4, brk, recvmsg, fstat, clone, recvfrom, sendto, mprotect, getsockname, getpeername, lseek, set, uname, connect, prctl, getgid, open, fstatfs, access, getdents, signalfd, getrlimit, listen, stat, setsockopt, openat, readlink, unlink, gettid, getuid, socket, madvise, bind, eventfd2, statfs, getegid, geteuidcompute" + "\n")
+
+for filename in os.listdir(dir_name):
+    temp_ls = np.loadtxt(dir_name+"/"+filename, dtype=int)
+    # print(temp_ls[0])
+    # input(1)
+    name = filename.replace('.txt', '')
+
+    for i in range(temp_ls.shape[0]):
+        result_file.writelines(name+'_'+str(i+1)+', ')
+        for j in range(temp_ls[i].shape[0]-1):
+            result_file.writelines(str(temp_ls[i][j])+', ')
+        result_file.writelines(str(temp_ls[i][-1])+'\n')
+
+    # input(1)
+    # np.savetxt(save_dir+"/"+filename, temp_ls)
+    # save_dict[filename] = temp_ls
+    # 還是存成pickle吧
+    # input(1)
+result_file.close()
+# with open(r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_m_2_b\998_malware_2_benign.pickle', 'wb') as handle:
+#     pickle.dump(save_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     handle.close()
