@@ -7,35 +7,52 @@ import time
 # 實驗結果: 有好有壞
 
 # 手動改的
-is_all = False
-input(1)
+is_all = True
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
 testing_data_dir = dir_path + r"\19_owl_rules"
-start_time = time.time()
-benign_samples = np.loadtxt(testing_data_dir+r"\owl_benign_samples.txt", dtype=str, delimiter=" ")
-# benign_samples = np.loadtxt(testing_data_dir+r"\owl_rule_1.txt", dtype=str, delimiter=" ")  # 用來測試 code 正確性
-benign_samples = benign_samples[:, :benign_samples.shape[1]-1]
-benign_samples = np.ndarray.astype(benign_samples, float)
-end_time = time.time()
-print(end_time - start_time)
+# start_time = time.time()
+# benign_samples = np.loadtxt(testing_data_dir+r"\owl_benign_samples.txt", dtype=str, delimiter=" ")
+# # benign_samples = np.loadtxt(testing_data_dir+r"\owl_rule_1.txt", dtype=str, delimiter=" ")  # 用來測試 code 正確性
+# benign_samples = benign_samples[:, :benign_samples.shape[1]-1]
+# benign_samples = np.ndarray.astype(benign_samples, float)
+# end_time = time.time()
+# print(end_time - start_time)
 
-rule_arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=str)
-# rule_arr = np.array([1, 2, 3, 4, 7, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19], dtype=str)
+# rule_arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=str)
+rule_arr = np.array([5, 6, 12, 14], dtype=str)
 data_amount_arr = np.array([65, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 39, 100, 40, 100, 100, 100, 100], dtype=str)
 outlier_amount = np.array([6, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 3, 10, 4, 10, 10, 10, 10], dtype=int)
 
+# env_train_f = np.zeros([19])
+# env_test_f = np.zeros([19])
+# bml_train_f = np.zeros([19])
+# bml_test_f = np.zeros([19])
+
+# for i in range(19):
+# TODO: 一次跑一個神經網路，結果存在上面那些array
+# start = time.time()
+# file = open(testing_data_dir+r"\owl_benign_samples.txt")
+# while 1:
+#     line = file.readline()
+#     if not line:
+#         break
+#     line = line.split(" ")
+#     line = line[:-1]
+#     one_row_input_x = np.array(line, dtype=float)
+# file.close()
+# print(time.time()-start)
+
 for a in range(rule_arr.shape[0]):
-    # TODO: rule 5,6 OOM in allocate large tensor, try to fix it
-    # for a in range(6, 19):
+# for a in range(20, 21):
     with tf.Graph().as_default():
         x_placeholder = tf.placeholder(tf.float64)
 
         rule = rule_arr[a]
-        data_amount = data_amount_arr[a]
+        # data_amount = data_amount_arr[a]
         sigma = "2"
+        print('rule {0}'.format(rule))
         # file_input = "owl_rule_"+rule+"_"+data_amount+"_and_benign_"+data_amount+"_sigma_"+sigma
         if is_all:
             dir_target = dir_path + r"\19_owl_rules" + r"\owl_rule_" + rule + "_all_training_data_sigma_" + sigma
@@ -88,23 +105,18 @@ for a in range(rule_arr.shape[0]):
                 if training_data_predict_output[i] < middle_point:
                     training_data_malware_predict_correct_count += 1
 
-        malware_samples = np.loadtxt(testing_data_dir + r"\owl_rule_" + rule + ".txt", dtype=str, delimiter=" ")
+        malware_samples = np.loadtxt(testing_data_dir+r"\owl_rule_"+rule+".txt", dtype=str, delimiter=" ")
         if is_all:
             malware_samples_training_part = malware_samples
         else:
-            malware_samples_training_part = np.loadtxt(
-                testing_data_dir + r"\owl_rule_" + rule + "_" + data_amount + "_and_benign_" + data_amount + "_rule_part.txt",
-                dtype=float, delimiter=" ")
-        malware_samples = malware_samples[:, :malware_samples.shape[1] - 1]
+            malware_samples_training_part = np.loadtxt(testing_data_dir+r"\owl_rule_"+rule+"_"+data_amount+"_and_benign_"+data_amount+"_rule_part.txt", dtype=float, delimiter=" ")
+        malware_samples = malware_samples[:, :malware_samples.shape[1]-1]
         malware_samples = np.ndarray.astype(malware_samples, float)
         if is_all:
-            benign_samples_training_part = np.loadtxt(testing_data_dir + r"\owl_rule_{0}.txt".format(rule), dtype=str,
-                                                      delimiter=" ")[:, :-1]
+            benign_samples_training_part = np.loadtxt(testing_data_dir+r"\owl_rule_{0}.txt".format(rule), dtype=str, delimiter=" ")[:, :-1]
             benign_samples_training_part = np.ndarray.astype(benign_samples_training_part, float)
         else:
-            benign_samples_training_part = np.loadtxt(
-                testing_data_dir + r"\owl_rule_" + rule + "_" + data_amount + "_and_benign_" + data_amount + "_benign_part.txt",
-                dtype=float, delimiter=" ")
+            benign_samples_training_part = np.loadtxt(testing_data_dir+r"\owl_rule_"+rule+"_"+data_amount+"_and_benign_"+data_amount+"_benign_part.txt", dtype=float, delimiter=" ")
 
         # print(malware_samples.shape)
         # print(ot.shape)
@@ -130,14 +142,32 @@ for a in range(rule_arr.shape[0]):
         testing_data_malware_count = predict_malware.shape[0] - training_data_malware_count
         testing_data_malware_predict_wrong_count = predict_malware[np.where(predict_malware >= middle_point)].shape[0] - (training_data_malware_count - training_data_malware_predict_correct_count)
 
-        start_time = time.time()
-        predict_benign = sess.run([output_layer], {x_placeholder: benign_samples})[0]
-        end_time = time.time()
-        print("forward pass 120W need "+str(end_time-start_time)+" seconds")
-        # print(predict_benign.shape)
-        # print(predict_benign[np.where(predict_benign < middle_point)].shape)
-        testing_data_benign_count = predict_benign.shape[0] - training_data_benign_count
-        testing_data_benign_predict_wrong_count = predict_benign[np.where(predict_benign < middle_point)].shape[0] - (training_data_benign_count - training_data_benign_predict_correct_count)
+        file = open(testing_data_dir + r"\owl_benign_samples.txt")
+        testing_data_benign_predict_wrong_count = 0
+        testing_data_benign_count = 0
+        while 1:
+            line = file.readline()
+            if not line:
+                break
+            testing_data_benign_count += 1
+            if testing_data_benign_count % 100000 == 0:
+                print('current run {0} data'.format(testing_data_benign_count))
+            line = line.split(" ")
+            line = line[:-1]
+            one_row_input_x = np.array(line, dtype=float).reshape(1, -1)
+            predict_benign = sess.run([output_layer], {x_placeholder: one_row_input_x})[0]
+            if predict_benign < middle_point:
+                testing_data_benign_predict_wrong_count += 1
+        testing_data_benign_predict_wrong_count -= (training_data_benign_count - training_data_benign_predict_correct_count)
+        testing_data_benign_count -= training_data_benign_count
+        file.close()
+
+        # 使用上方的一行一行讀取代
+        # predict_benign = sess.run([output_layer], {x_placeholder: benign_samples})[0]
+        # # print(predict_benign.shape)
+        # # print(predict_benign[np.where(predict_benign < middle_point)].shape)
+        # testing_data_benign_count = predict_benign.shape[0] - training_data_benign_count
+        # testing_data_benign_predict_wrong_count = predict_benign[np.where(predict_benign < middle_point)].shape[0] - (training_data_benign_count - training_data_benign_predict_correct_count)
 
         # print(file_input)
         print("outlier neuron network")
@@ -147,7 +177,7 @@ for a in range(rule_arr.shape[0]):
         print("False Positive of Benign Testing Data: {0}/{1}".format(testing_data_benign_predict_wrong_count, testing_data_benign_count))
         print("False Negative of Rule Testing Data: {0}/{1}".format(testing_data_malware_predict_wrong_count, testing_data_malware_count))
 
-        result_file = open(dir_target + r"\_outlier_nn_vs_pure_bp_nn.txt", 'w')
+        result_file = open(dir_target + r"\_outlier_nn_vs_pure_bp_nn.txt", 'a')
         result_file.writelines("outlier neuron network"+"\n")
         result_file.writelines("alpha: {0}".format(alpha)+"\n")
         result_file.writelines("beta: {0}".format(beta) + "\n")
@@ -198,9 +228,28 @@ for a in range(rule_arr.shape[0]):
             testing_data_malware_count = predict_malware.shape[0] - training_data_malware_count
             testing_data_malware_predict_wrong_count = predict_malware[np.where(predict_malware >= middle_point)].shape[0] - (training_data_malware_count - training_data_malware_predict_correct_count)
 
-            predict_benign = sess.run([output_layer], {x_placeholder: benign_samples})[0]
-            testing_data_benign_count = predict_benign.shape[0] - training_data_benign_count
-            testing_data_benign_predict_wrong_count = predict_benign[np.where(predict_benign < middle_point)].shape[0] - (training_data_benign_count - training_data_benign_predict_correct_count)
+            file = open(testing_data_dir + r"\owl_benign_samples.txt")
+            testing_data_benign_predict_wrong_count = 0
+            testing_data_benign_count = 0
+            while 1:
+                line = file.readline()
+                if not line:
+                    break
+                testing_data_benign_count += 1
+                line = line.split(" ")
+                line = line[:-1]
+                one_row_input_x = np.array(line, dtype=float).reshape(1,-1)
+                predict_benign = sess.run([output_layer], {x_placeholder: one_row_input_x})[0]
+                if predict_benign < middle_point:
+                    testing_data_benign_predict_wrong_count += 1
+            testing_data_benign_predict_wrong_count -= (training_data_benign_count - training_data_benign_predict_correct_count)
+            testing_data_benign_count -= training_data_benign_count
+            file.close()
+
+            # 被上面的code取代
+            # predict_benign = sess.run([output_layer], {x_placeholder: benign_samples})[0]
+            # testing_data_benign_count = predict_benign.shape[0] - training_data_benign_count
+            # testing_data_benign_predict_wrong_count = predict_benign[np.where(predict_benign < middle_point)].shape[0] - (training_data_benign_count - training_data_benign_predict_correct_count)
 
             print("pure bp neuron network")
             print("middle point: {0}".format(middle_point))
@@ -336,6 +385,7 @@ for a in range(rule_arr.shape[0]):
         else:
             file_name = r"19_owl_rules\owl_rule_" + rule + "_" + data_amount + "_and_benign_" + data_amount
             training_data = np.loadtxt(file_name + ".txt", dtype=float, delimiter=" ")
+
         x_training_data = training_data[:, 1:]
         y_training_data = training_data[:, 0].reshape((-1, 1))
         predict_training_data = sess.run([output_layer], {x_placeholder: x_training_data})[0]
@@ -353,9 +403,27 @@ for a in range(rule_arr.shape[0]):
                                                        0] - (
                                                    training_data_malware_count - training_data_malware_predict_correct_count)
 
-        predict_benign = sess.run([output_layer], {x_placeholder: benign_samples})[0]
-        testing_data_benign_count = predict_benign.shape[0] - training_data_benign_count
-        testing_data_benign_predict_wrong_count = predict_benign[np.where(predict_benign < middle_point)].shape[0] - (training_data_benign_count - training_data_benign_predict_correct_count)
+        file = open(testing_data_dir + r"\owl_benign_samples.txt")
+        testing_data_benign_predict_wrong_count = 0
+        testing_data_benign_count = 0
+        while 1:
+            line = file.readline()
+            if not line:
+                break
+            testing_data_benign_count += 1
+            line = line.split(" ")
+            line = line[:-1]
+            one_row_input_x = np.array(line, dtype=float).reshape(1,-1)
+            predict_benign = sess.run([output_layer], {x_placeholder: one_row_input_x})[0]
+            if predict_benign < middle_point:
+                testing_data_benign_predict_wrong_count += 1
+        testing_data_benign_predict_wrong_count -= (training_data_benign_count - training_data_benign_predict_correct_count)
+        testing_data_benign_count -= training_data_benign_count
+        file.close()
+
+        # predict_benign = sess.run([output_layer], {x_placeholder: benign_samples})[0]
+        # testing_data_benign_count = predict_benign.shape[0] - training_data_benign_count
+        # testing_data_benign_predict_wrong_count = predict_benign[np.where(predict_benign < middle_point)].shape[0] - (training_data_benign_count - training_data_benign_predict_correct_count)
 
         print("bml")
         print("middle point: {0}".format(middle_point))

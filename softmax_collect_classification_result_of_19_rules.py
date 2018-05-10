@@ -11,6 +11,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # input_file_name = "benign_samples"
 
 # sum_s = 0
+false_classification_count = 0
 
 csv_file = open("__softmax_can_copy_to_figure.csv", 'w')
 # csv_file.writelines(', Benign Training Data False Positive Rate, Malicious Training Data False Negative Rate, Benign Testing Data False Positive Rate, Benign Training Data False Negative Rate' + "\n")

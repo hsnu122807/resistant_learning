@@ -258,32 +258,201 @@ import pickle
 #     print('anomaly: B({0})   M({1})'.format(benign_count, mal_count))
 
 
-# 把double轉int
-dir_name = r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_malware_2_benign'
-save_dir = r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_m_2_b'
-# save_dict = {}
-result_file = open(save_dir + r"/998_malware_2_benign", 'w')
-result_file.writelines("52" + "\n")
-result_file.writelines("rt, tgkill, read, ppoll, futex, write, ioctl, exit, close, SIGTERM, poll, munmap, exited, fcntl, mmap, accept4, brk, recvmsg, fstat, clone, recvfrom, sendto, mprotect, getsockname, getpeername, lseek, set, uname, connect, prctl, getgid, open, fstatfs, access, getdents, signalfd, getrlimit, listen, stat, setsockopt, openat, readlink, unlink, gettid, getuid, socket, madvise, bind, eventfd2, statfs, getegid, geteuidcompute" + "\n")
+# # 把double轉int
+# dir_name = r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_malware_2_benign'
+# save_dir = r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_m_2_b'
+# # save_dict = {}
+# result_file = open(save_dir + r"/998_malware_2_benign", 'w')
+# result_file.writelines("52" + "\n")
+# result_file.writelines("rt, tgkill, read, ppoll, futex, write, ioctl, exit, close, SIGTERM, poll, munmap, exited, fcntl, mmap, accept4, brk, recvmsg, fstat, clone, recvfrom, sendto, mprotect, getsockname, getpeername, lseek, set, uname, connect, prctl, getgid, open, fstatfs, access, getdents, signalfd, getrlimit, listen, stat, setsockopt, openat, readlink, unlink, gettid, getuid, socket, madvise, bind, eventfd2, statfs, getegid, geteuidcompute" + "\n")
+#
+# for filename in os.listdir(dir_name):
+#     temp_ls = np.loadtxt(dir_name+"/"+filename, dtype=int)
+#     # print(temp_ls[0])
+#     # input(1)
+#     name = filename.replace('.txt', '')
+#
+#     for i in range(temp_ls.shape[0]):
+#         result_file.writelines(name+'_'+str(i+1)+', ')
+#         for j in range(temp_ls[i].shape[0]-1):
+#             result_file.writelines(str(temp_ls[i][j])+', ')
+#         result_file.writelines(str(temp_ls[i][-1])+'\n')
+#
+#     # input(1)
+#     # np.savetxt(save_dir+"/"+filename, temp_ls)
+#     # save_dict[filename] = temp_ls
+#     # 還是存成pickle吧
+#     # input(1)
+# result_file.close()
+# # with open(r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_m_2_b\998_malware_2_benign.pickle', 'wb') as handle:
+# #     pickle.dump(save_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# #     handle.close()
 
-for filename in os.listdir(dir_name):
-    temp_ls = np.loadtxt(dir_name+"/"+filename, dtype=int)
-    # print(temp_ls[0])
-    # input(1)
-    name = filename.replace('.txt', '')
+# # 可以用來快速加總100分類錯誤個數
+# env_train_f = 0
+# env_test_f = 0
+# bml_train_f = 0
+# bml_test_f = 0
+# for i in range(1, 20):
+#     start = 15  # 開始在第幾行 (min: 1)
+#     end = 15  # 結束在第幾行
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     owl_19_dir = dir_path + r"\19_owl_rules"
+#
+#     owl_rule = str(i)
+#
+#     sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
+#     sample_amount = sample_amount_arr[i-1]
+#     # target_dir = owl_19_dir+r"\owl_rule_"+owl_rule+"_"+sample_amount+"_and_benign_"+sample_amount+"_bml"
+#     target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_" + sample_amount + "_and_benign_" + sample_amount + "_sigma_2"
+#
+#     file = open(target_dir + r"\_outlier_nn_vs_pure_bp_nn.txt")
+#     line_index = 1
+#     while 1:
+#         line = file.readline()
+#         if not line:
+#             break
+#         # temp_ls = line.split(" ")
+#         # print(temp_ls[-2], end="")
+#         if line_index == 5 or line_index == 6:
+#             etrf = line.split(": ")[1].split("/")[0]
+#             env_train_f += int(etrf)
+#         if line_index == 7 or line_index == 8:
+#             etef = line.split(": ")[1].split("/")[0]
+#             env_test_f += int(etef)
+#         if line_index == 23 or line_index == 24:
+#             btrf = line.split(": ")[1].split("/")[0]
+#             bml_train_f += int(btrf)
+#         if line_index == 25 or line_index == 26:
+#             btef = line.split(": ")[1].split("/")[0]
+#             bml_test_f += int(btef)
+#         line_index += 1
+#     file.close()
+# print('env_train_f = {0}  env_test_f = {1}  bml_train_f = {2}  bml_test_f = {3}'.format(env_train_f, env_test_f, bml_train_f, bml_test_f))
 
-    for i in range(temp_ls.shape[0]):
-        result_file.writelines(name+'_'+str(i+1)+', ')
-        for j in range(temp_ls[i].shape[0]-1):
-            result_file.writelines(str(temp_ls[i][j])+', ')
-        result_file.writelines(str(temp_ls[i][-1])+'\n')
+# minor test
+# a = 3.4
+# print(int(a))
 
-    # input(1)
-    # np.savetxt(save_dir+"/"+filename, temp_ls)
-    # save_dict[filename] = temp_ls
-    # 還是存成pickle吧
-    # input(1)
-result_file.close()
-# with open(r'C:\Users\user\PycharmProjects\autoencoder\resistant_learning\998_m_2_b\998_malware_2_benign.pickle', 'wb') as handle:
-#     pickle.dump(save_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-#     handle.close()
+# # try convert str to numpy float
+# dir_path = os.path.dirname(os.path.realpath(__file__))
+# testing_data_dir = dir_path + r"\19_owl_rules"
+# file = open(testing_data_dir+r"\owl_benign_samples.txt")
+# while 1:
+#     line = file.readline()
+#     if not line:
+#         break
+#     line = line.split(" ")
+#     line = line[:-1]
+#     line = np.array(line, dtype=float)
+#     print(line)
+# file.close()
+
+# # test array '+=' change array value
+# test = np.zeros([10])
+# for i in range(10):
+#     test[i] += i
+# print(test)
+
+# # 可以用來快速加總all分類錯誤個數
+# env_train_f = 0
+# env_test_f = 0
+# bml_train_f = 0
+# bml_test_f = 0
+# env_train_f_fenmu = 0
+# env_test_f_fenmu = 0
+# bml_train_f_fenmu = 0
+# bml_test_f_fenmu = 0
+# for i in range(1, 20):
+#     start = 15  # 開始在第幾行 (min: 1)
+#     end = 15  # 結束在第幾行
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     owl_19_dir = dir_path + r"\19_owl_rules"
+#
+#     owl_rule = str(i)
+#
+#     target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_all_training_data_sigma_2"
+#
+#     file = open(target_dir + r"\_outlier_nn_vs_pure_bp_nn.txt")
+#     line_index = 1
+#     while 1:
+#         line = file.readline()
+#         if not line:
+#             break
+#         # temp_ls = line.split(" ")
+#         # print(temp_ls[-2], end="")
+#         if line_index == 5 or line_index == 6:
+#             etrf = line.split(": ")[1].split("/")[0]
+#             env_train_f += int(etrf)
+#             env_train_f_fenmu += int(line.split(": ")[1].split("/")[1])
+#         if line_index == 7 or line_index == 8:
+#             etef = line.split(": ")[1].split("/")[0]
+#             env_test_f += int(etef)
+#             env_test_f_fenmu += int(line.split(": ")[1].split("/")[1])
+#         if line_index == 14 or line_index == 15:
+#             btrf = line.split(": ")[1].split("/")[0]
+#             bml_train_f += int(btrf)
+#             bml_train_f_fenmu += int(line.split(": ")[1].split("/")[1])
+#         if line_index == 16 or line_index == 17:
+#             btef = line.split(": ")[1].split("/")[0]
+#             bml_test_f += int(btef)
+#             bml_test_f_fenmu += int(line.split(": ")[1].split("/")[1])
+#         line_index += 1
+#     file.close()
+# print('env_train_f = {0}/{1}  env_test_f = {2}/{3}  bml_train_f = {4}/{5}  bml_test_f = {6}/{7}'.format(env_train_f, env_train_f_fenmu, env_test_f, env_test_f_fenmu, bml_train_f, bml_train_f_fenmu, bml_test_f, bml_test_f_fenmu))
+
+# # 讀mix_19_rules_binary_classification資料夾裡面的training和testing分析並做成表格 後來發現有別的做法 這邊的code沒完成
+# dir_path = os.path.dirname(os.path.realpath(__file__))
+# two_class_result_dir = dir_path + r"\mix_19_rules_binary_classification"
+# network_type_arr = ['softmax', 'env', 'bml']
+# for i in range(len(network_type_arr)):
+#     sampling_type_arr = ['all_rules_data_sample_1_of_10_{0}_separate_benign_and_malicious'.format(network_type_arr[i]), 'all_rules_data_sample_100_{0}_separate_benign_and_malicious'.format(network_type_arr[i]), 'all_rules_data_sample_all_{0}_separate_benign_and_malicious'.format(network_type_arr[i])]
+#     network_type = network_type_arr[i]
+#     for j in range(len(sampling_type_arr)):
+#         sampling_type = sampling_type_arr[j]
+#         if not (network_type == 'env' and j == 2):
+#             print('network type: {0}    sampling type: {1}'.format(network_type, sampling_type))
+#             print('training')
+#             file = open(two_class_result_dir + "/" + network_type + "/" + sampling_type + "/training_data_analyze.txt")
+#             line_index = 1
+#             zi_sum = 0
+#             mu_sum = 0
+#             while 1:
+#                 line = file.readline()
+#                 if not line:
+#                     break
+#                 if line_index <= 20:
+#                     fenzi = int(line.split(": ")[1].split("/")[0])
+#                     fenmu = int(line.split(": ")[1].split("/")[1])
+#                 else:
+#                     break
+#                 line_index += 1
+#             file.close()
+#             print('testing')
+
+# 可以用來快速加總softmax 100分類錯誤個數
+softmax_train_correct = 0
+softmax_train_total = 0
+for i in range(1, 20):
+    start = 15  # 開始在第幾行 (min: 1)
+    end = 15  # 結束在第幾行
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    owl_19_dir = dir_path + r"\19_owl_rules"
+
+    owl_rule = str(i)
+
+    sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
+    sample_amount = sample_amount_arr[i-1]
+    target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_" + sample_amount + "_and_benign_" + sample_amount + "_softmax"
+
+    file = open(target_dir + r"\_training_analyze.txt")
+    line_index = 1
+    while 1:
+        line = file.readline()
+        if not line:
+            break
+        softmax_train_correct += int(line.split(": ")[1].split("/")[0])
+        softmax_train_total += int(line.split(": ")[1].split("/")[1].split(' ')[0])
+        line_index += 1
+    file.close()
+print('softmax_train_correct = {0}/{1}'.format(softmax_train_correct, softmax_train_total))

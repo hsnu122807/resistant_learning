@@ -11,10 +11,10 @@ every_stage_max_thinking_times = 1
 outlier_rate = 0.05
 sampling_rate = 0.1
 sampling_amount = 100
-sampling_by_rate = True  # if False: sampling by fix amount
+sampling_by_rate = False  # if False: sampling by fix amount
 # analyze_result_save_dir_name = "all_rules_data_sample_all_bml_separate_benign_and_malicious"
-analyze_result_save_dir_name = "all_rules_data_sample_1_of_10_bml_separate_benign_and_malicious"
-# analyze_result_save_dir_name = "all_rules_data_sample_100_bml_separate_benign_and_malicious"
+# analyze_result_save_dir_name = "all_rules_data_sample_1_of_10_bml_separate_benign_and_malicious"
+analyze_result_save_dir_name = "all_rules_data_sample_100_bml_separate_benign_and_malicious"
 
 # 所有不重複pattern中抽樣分兩類
 training_data_container = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=object)
@@ -229,9 +229,9 @@ last_beta = beta
 # concat_y_training_data = np.concatenate((y_training_data_mal_part, y_training_data_benign_part), axis=0)
 # concat_x_and_y = np.concatenate((concat_x_training_data, concat_y_training_data), axis=1)
 
-for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
-    print('-----stage: ' + str(n) + '-----')
-    training_process_log.writelines('-----stage: ' + str(n) + '-----' + "\n")
+for n in range(m+3, int(data_size * (1 - outlier_rate) + 1)):
+    print('-----stage: ' + str(n-1) + '-----')
+    training_process_log.writelines('-----stage: ' + str(n-1) + '-----' + "\n")
 
     # pick n most fit data(每個stage都要維持alpha-beta的最大值)
     predict_y_mal_part = sess.run([output_layer], {x_placeholder: x_training_data_mal_part, y_placeholder: y_training_data_mal_part})[0]

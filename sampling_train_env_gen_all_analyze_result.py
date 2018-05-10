@@ -7,14 +7,14 @@ import os
 dir_path = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\mix_19_rules_binary_classification\env"
 
 # 可能會手動調整的參數
-every_stage_max_thinking_times = 1
+every_stage_max_thinking_times = 10000
 outlier_rate = 0.05
-sampling_rate = 0.1
+sampling_rate = 1.0
 sampling_amount = 100
 sampling_by_rate = True  # if False: sampling by fix amount
-# analyze_result_save_dir_name = "all_rules_data_sample_all_env_separate_benign_and_malicious"
+analyze_result_save_dir_name = "all_rules_data_sample_all_env_separate_benign_and_malicious"
 # analyze_result_save_dir_name = "all_rules_data_sample_1_of_10_env_separate_benign_and_malicious"
-analyze_result_save_dir_name = "all_rules_data_sample_100_env_separate_benign_and_malicious"
+# analyze_result_save_dir_name = "all_rules_data_sample_100_env_separate_benign_and_malicious"
 
 # 所有不重複pattern中抽樣分兩類
 training_data_container = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], dtype=object)
@@ -199,7 +199,8 @@ with tf.name_scope('calculate_envelope_width'):
 # create file to save training process
 training_process = open(new_path + r"\_training_process.txt", 'w')
 
-for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
+# for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
+for n in range(22900, int(data_size * (1 - outlier_rate) + 1)):
     print('-----stage: ' + str(n) + '-----')
     training_process.writelines('-----stage: ' + str(n) + '-----' + "\n")
 
@@ -215,8 +216,8 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
     y_training_data_sort_by_residual = np.delete(sort_result, slice(0, m + 1), axis=1)  # 去除從0到m欄
 
     # take first n row of data, this stage use these data to train the NN
-    current_stage_x_training_data = x_training_data_sort_by_residual[:n]
-    current_stage_y_training_data = y_training_data_sort_by_residual[:n]
+    current_stage_x_training_data = x_training_data_sort_by_residual[:n+1]
+    current_stage_y_training_data = y_training_data_sort_by_residual[:n+1]
     # print(current_stage_x_training_data)
     # print(current_stage_y_training_data)
 
@@ -290,9 +291,9 @@ for n in range(m+2, int(data_size * (1 - outlier_rate) + 1)):
             current_hidden_weights, current_hidden_thresholds, current_output_weights, current_output_threshold = sess.run([hidden_weights, hidden_thresholds, output_weights, output_threshold], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
             predict_y = sess.run([output_layer], {x_placeholder: current_stage_x_training_data, y_placeholder: current_stage_y_training_data})
 
-            x_c = current_stage_x_training_data[:n - 1]
-            x_k = current_stage_x_training_data[n - 1:]
-            y_k = current_stage_y_training_data[n - 1:]
+            x_c = current_stage_x_training_data[:n]
+            x_k = current_stage_x_training_data[n:]
+            y_k = current_stage_y_training_data[n:]
             # print(x_c.shape)
             # print(x_k.shape)
             # input()
@@ -479,7 +480,6 @@ file.writelines("cramming_times_count: " + str(cramming_times_count) + "\n")
 file.writelines("softening_thinking_times_count: " + str(softening_thinking_times_count) + "\n")
 file.writelines("pruning_success_times_count: " + str(pruning_success_times_count) + "\n")
 
-# TODO: get majority alpha and beta and middle point
 majority_amount = int(data_size * (1 - outlier_rate))
 majority_residual_and_predict_y_x = sort_result[:majority_amount]
 majority_desire_output = majority_residual_and_predict_y_x[:, 2].reshape(-1, 1)
@@ -487,7 +487,6 @@ benign_predictions = majority_residual_and_predict_y_x[np.where(majority_desire_
 alpha = min(benign_predictions)
 mal_predictions = majority_residual_and_predict_y_x[np.where(majority_desire_output == -1)[0]][:, 1]
 beta = max(mal_predictions)
-
 anomaly_residual_and_predict_y_x = sort_result[majority_amount:]
 anomaly_desire_output = anomaly_residual_and_predict_y_x[:, 2].reshape(-1, 1)
 potential_anomaly_benign_amount = np.where(anomaly_desire_output == 1)[0].shape[0]
