@@ -293,6 +293,8 @@ import pickle
 # env_test_f = 0
 # bml_train_f = 0
 # bml_test_f = 0
+# soft_train_f = 0
+# soft_test_f = 0
 # for i in range(1, 20):
 #     start = 15  # 開始在第幾行 (min: 1)
 #     end = 15  # 結束在第幾行
@@ -326,9 +328,15 @@ import pickle
 #         if line_index == 25 or line_index == 26:
 #             btef = line.split(": ")[1].split("/")[0]
 #             bml_test_f += int(btef)
+#         if line_index == 14 or line_index == 15:
+#             strf = line.split(": ")[1].split("/")[0]
+#             soft_train_f += int(strf)
+#         if line_index == 16 or line_index == 17:
+#             stef = line.split(": ")[1].split("/")[0]
+#             soft_test_f += int(stef)
 #         line_index += 1
 #     file.close()
-# print('env_train_f = {0}  env_test_f = {1}  bml_train_f = {2}  bml_test_f = {3}'.format(env_train_f, env_test_f, bml_train_f, bml_test_f))
+# print('env_train_f = {0}  env_test_f = {1}  bml_train_f = {2}  bml_test_f = {3}  soft_train_f = {4} soft_test_f = {5}'.format(env_train_f, env_test_f, bml_train_f, bml_test_f, soft_train_f, soft_test_f))
 
 # minor test
 # a = 3.4
@@ -354,52 +362,64 @@ import pickle
 #     test[i] += i
 # print(test)
 
-# # 可以用來快速加總all分類錯誤個數
-# env_train_f = 0
-# env_test_f = 0
-# bml_train_f = 0
-# bml_test_f = 0
-# env_train_f_fenmu = 0
-# env_test_f_fenmu = 0
-# bml_train_f_fenmu = 0
-# bml_test_f_fenmu = 0
-# for i in range(1, 20):
-#     start = 15  # 開始在第幾行 (min: 1)
-#     end = 15  # 結束在第幾行
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     owl_19_dir = dir_path + r"\19_owl_rules"
-#
-#     owl_rule = str(i)
-#
-#     target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_all_training_data_sigma_2"
-#
-#     file = open(target_dir + r"\_outlier_nn_vs_pure_bp_nn.txt")
-#     line_index = 1
-#     while 1:
-#         line = file.readline()
-#         if not line:
-#             break
-#         # temp_ls = line.split(" ")
-#         # print(temp_ls[-2], end="")
-#         if line_index == 5 or line_index == 6:
-#             etrf = line.split(": ")[1].split("/")[0]
-#             env_train_f += int(etrf)
-#             env_train_f_fenmu += int(line.split(": ")[1].split("/")[1])
-#         if line_index == 7 or line_index == 8:
-#             etef = line.split(": ")[1].split("/")[0]
-#             env_test_f += int(etef)
-#             env_test_f_fenmu += int(line.split(": ")[1].split("/")[1])
-#         if line_index == 14 or line_index == 15:
-#             btrf = line.split(": ")[1].split("/")[0]
-#             bml_train_f += int(btrf)
-#             bml_train_f_fenmu += int(line.split(": ")[1].split("/")[1])
-#         if line_index == 16 or line_index == 17:
-#             btef = line.split(": ")[1].split("/")[0]
-#             bml_test_f += int(btef)
-#             bml_test_f_fenmu += int(line.split(": ")[1].split("/")[1])
-#         line_index += 1
-#     file.close()
-# print('env_train_f = {0}/{1}  env_test_f = {2}/{3}  bml_train_f = {4}/{5}  bml_test_f = {6}/{7}'.format(env_train_f, env_train_f_fenmu, env_test_f, env_test_f_fenmu, bml_train_f, bml_train_f_fenmu, bml_test_f, bml_test_f_fenmu))
+# 可以用來快速加總all分類錯誤個數
+env_train_f = 0
+env_test_f = 0
+bml_train_f = 0
+bml_test_f = 0
+soft_train_f = 0
+soft_test_f = 0
+env_train_f_fenmu = 0
+env_test_f_fenmu = 0
+bml_train_f_fenmu = 0
+bml_test_f_fenmu = 0
+soft_train_f_fenmu = 0
+soft_test_f_fenmu = 0
+for i in range(1, 20):
+    start = 15  # 開始在第幾行 (min: 1)
+    end = 15  # 結束在第幾行
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    owl_19_dir = dir_path + r"\19_owl_rules"
+
+    owl_rule = str(i)
+
+    target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_all_training_data_sigma_2"
+
+    file = open(target_dir + r"\_outlier_nn_vs_pure_bp_nn.txt")
+    line_index = 1
+    while 1:
+        line = file.readline()
+        if not line:
+            break
+        # temp_ls = line.split(" ")
+        # print(temp_ls[-2], end="")
+        if line_index == 5 or line_index == 6:
+            etrf = line.split(": ")[1].split("/")[0]
+            env_train_f += int(etrf)
+            env_train_f_fenmu += int(line.split(": ")[1].split("/")[1])
+        if line_index == 7 or line_index == 8:
+            etef = line.split(": ")[1].split("/")[0]
+            env_test_f += int(etef)
+            env_test_f_fenmu += int(line.split(": ")[1].split("/")[1])
+        if line_index == 14 or line_index == 15:
+            btrf = line.split(": ")[1].split("/")[0]
+            bml_train_f += int(btrf)
+            bml_train_f_fenmu += int(line.split(": ")[1].split("/")[1])
+        if line_index == 16 or line_index == 17:
+            btef = line.split(": ")[1].split("/")[0]
+            bml_test_f += int(btef)
+            bml_test_f_fenmu += int(line.split(": ")[1].split("/")[1])
+        if line_index == 20 or line_index == 21:
+            strf = line.split(": ")[1].split("/")[0]
+            soft_train_f += int(strf)
+            soft_train_f_fenmu += int(line.split(": ")[1].split("/")[1])
+        if line_index == 22 or line_index == 23:
+            stef = line.split(": ")[1].split("/")[0]
+            soft_test_f += int(stef)
+            soft_test_f_fenmu += int(line.split(": ")[1].split("/")[1])
+        line_index += 1
+    file.close()
+print('env_train_f = {0}/{1}  env_test_f = {2}/{3}  bml_train_f = {4}/{5}  bml_test_f = {6}/{7}  soft_train_f = {8}/{9}  soft_test_f = {10}/{11}'.format(env_train_f, env_train_f_fenmu, env_test_f, env_test_f_fenmu, bml_train_f, bml_train_f_fenmu, bml_test_f, bml_test_f_fenmu, soft_train_f, soft_train_f_fenmu, soft_test_f, soft_test_f_fenmu))
 
 # # 讀mix_19_rules_binary_classification資料夾裡面的training和testing分析並做成表格 後來發現有別的做法 這邊的code沒完成
 # dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -430,29 +450,29 @@ import pickle
 #             file.close()
 #             print('testing')
 
-# 可以用來快速加總softmax 100分類錯誤個數
-softmax_train_correct = 0
-softmax_train_total = 0
-for i in range(1, 20):
-    start = 15  # 開始在第幾行 (min: 1)
-    end = 15  # 結束在第幾行
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    owl_19_dir = dir_path + r"\19_owl_rules"
-
-    owl_rule = str(i)
-
-    sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
-    sample_amount = sample_amount_arr[i-1]
-    target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_" + sample_amount + "_and_benign_" + sample_amount + "_softmax"
-
-    file = open(target_dir + r"\_training_analyze.txt")
-    line_index = 1
-    while 1:
-        line = file.readline()
-        if not line:
-            break
-        softmax_train_correct += int(line.split(": ")[1].split("/")[0])
-        softmax_train_total += int(line.split(": ")[1].split("/")[1].split(' ')[0])
-        line_index += 1
-    file.close()
-print('softmax_train_correct = {0}/{1}'.format(softmax_train_correct, softmax_train_total))
+# # 可以用來快速加總softmax 100分類錯誤個數
+# softmax_train_correct = 0
+# softmax_train_total = 0
+# for i in range(1, 20):
+#     start = 15  # 開始在第幾行 (min: 1)
+#     end = 15  # 結束在第幾行
+#     dir_path = os.path.dirname(os.path.realpath(__file__))
+#     owl_19_dir = dir_path + r"\19_owl_rules"
+#
+#     owl_rule = str(i)
+#
+#     sample_amount_arr = ['65', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '100', '39', '100', '40', '100', '100', '100', '100']
+#     sample_amount = sample_amount_arr[i-1]
+#     target_dir = owl_19_dir + r"\owl_rule_" + owl_rule + "_" + sample_amount + "_and_benign_" + sample_amount + "_softmax"
+#
+#     file = open(target_dir + r"\_training_analyze.txt")
+#     line_index = 1
+#     while 1:
+#         line = file.readline()
+#         if not line:
+#             break
+#         softmax_train_correct += int(line.split(": ")[1].split("/")[0])
+#         softmax_train_total += int(line.split(": ")[1].split("/")[1].split(' ')[0])
+#         line_index += 1
+#     file.close()
+# print('softmax_train_correct = {0}/{1}'.format(softmax_train_correct, softmax_train_total))

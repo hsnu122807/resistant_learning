@@ -8,6 +8,7 @@ dir_path = r"C:\Users\user\PycharmProjects\autoencoder\resistant_learning\19_owl
 # input(1)
 
 # 可能會手動調整的參數
+is_all = True
 learning_rate_eta = 0.000005
 max_bp_times_in_stage = 100000
 target_accuracy = 0.95
@@ -18,7 +19,10 @@ data_amount_arr = np.array([65, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100
 
 for rule in range(rule_arr.shape[0]):
     print('rule: '+rule_arr[rule])
-    analyze_result_save_dir_name = r"\owl_rule_{0}_{1}_and_benign_{1}_softmax".format(rule_arr[rule], data_amount_arr[rule])
+    if is_all:
+        analyze_result_save_dir_name = r"\owl_rule_{0}_all_training_data_softmax".format(rule_arr[rule], data_amount_arr[rule])
+    else:
+        analyze_result_save_dir_name = r"\owl_rule_{0}_{1}_and_benign_{1}_softmax".format(rule_arr[rule], data_amount_arr[rule])
     # create folder to save training process
     new_path = r"{0}/".format(dir_path) + analyze_result_save_dir_name
     if not os.path.exists(new_path):
@@ -26,22 +30,42 @@ for rule in range(rule_arr.shape[0]):
 
     start_time = time.time()
 
-    benign_samples = np.loadtxt(dir_path+r'\owl_rule_{0}_{1}_and_benign_{1}_benign_part.txt'.format(rule_arr[rule], data_amount_arr[rule]), dtype=float, delimiter=' ')
-    malware_samples = np.loadtxt(dir_path + r'\owl_rule_{0}_{1}_and_benign_{1}_rule_part.txt'.format(rule_arr[rule], data_amount_arr[rule]), dtype=float, delimiter=' ')
+    if is_all:
+        testing_data_dir = dir_path + r"\19_owl_rules"
+        benign_samples = np.loadtxt(dir_path + r"\owl_rule_{0}_equal_number_benign_sample.txt".format(rule_arr[rule]), dtype=str, delimiter=" ")
+        benign_samples = benign_samples[:, :benign_samples.shape[1] - 1]
+        benign_samples = np.ndarray.astype(benign_samples, float)
+        malware_samples = np.loadtxt(dir_path + r"\owl_rule_{0}.txt".format(rule_arr[rule]), dtype=str, delimiter=" ")
+        malware_samples = malware_samples[:, :malware_samples.shape[1] - 1]
+        malware_samples = np.ndarray.astype(malware_samples, float)
+    else:
+        benign_samples = np.loadtxt(dir_path+r'\owl_rule_{0}_{1}_and_benign_{1}_benign_part.txt'.format(rule_arr[rule], data_amount_arr[rule]), dtype=float, delimiter=' ')
+        malware_samples = np.loadtxt(dir_path + r'\owl_rule_{0}_{1}_and_benign_{1}_rule_part.txt'.format(rule_arr[rule], data_amount_arr[rule]), dtype=float, delimiter=' ')
     np.random.shuffle(benign_samples)
     np.random.shuffle(malware_samples)
 
     m = malware_samples.shape[1]
     N = malware_samples.shape[0] + benign_samples.shape[0]
 
-    training_data = np.loadtxt(dir_path + r'\owl_rule_{0}_{1}_and_benign_{1}.txt'.format(rule_arr[rule], data_amount_arr[rule]), dtype=float, delimiter=' ')
-    training_x = training_data[:, 1:]
-    y_benign_element = np.zeros(2)
-    y_mal_element = np.zeros(2)
-    y_benign_element[0] = 1
-    y_mal_element[1] = 1
-    y_element = np.concatenate([y_mal_element, y_benign_element], axis=0)
-    training_y = np.tile(y_element, int(data_amount_arr[rule])).reshape(-1, 2)
+    if is_all:
+        training_x = np.concatenate([benign_samples, malware_samples], axis=0)
+        y_benign_element = np.zeros(2)
+        y_mal_element = np.zeros(2)
+        y_benign_element[0] = 1
+        y_mal_element[1] = 1
+        yb = np.tile(y_benign_element, benign_samples.shape[0]).reshape(-1, 2)
+        ym = np.tile(y_mal_element, malware_samples.shape[0]).reshape(-1, 2)
+        training_y = np.concatenate([yb, ym], axis=0)
+    else:
+        training_data = np.loadtxt(dir_path + r'\owl_rule_{0}_{1}_and_benign_{1}.txt'.format(rule_arr[rule], data_amount_arr[rule]), dtype=float, delimiter=' ')
+        training_x = training_data[:, 1:]
+        y_benign_element = np.zeros(2)
+        y_mal_element = np.zeros(2)
+        y_benign_element[0] = 1
+        y_mal_element[1] = 1
+        y_element = np.concatenate([y_mal_element, y_benign_element], axis=0)
+        training_y = np.tile(y_element, int(data_amount_arr[rule])).reshape(-1, 2)
+
     majority_rate = 0.95
     bp_times = 0
 
@@ -73,15 +97,23 @@ for rule in range(rule_arr.shape[0]):
         for stage in range(m+2, int(majority_rate * N) + 1):
             print('stage {0}'.format(stage))
             if stage == (m+2):
-                current_stage_training_x = training_x[:m+2]
-                current_stage_training_y = training_y[:m+2]
-                print(current_stage_training_x.shape)
-                print(current_stage_training_y.shape)
+                if is_all:
+                    half_index = (m+2)//2
+                    benign_init = benign_samples[:half_index]
+                    mal_init = malware_samples[:half_index]
+                    current_stage_training_x = np.concatenate([benign_init, mal_init], axis=0)
+                    yb = np.tile(y_benign_element, half_index).reshape(-1, 2)
+                    ym = np.tile(y_mal_element, half_index).reshape(-1, 2)
+                    current_stage_training_y = np.concatenate([yb, ym], axis=0)
+                else:
+                    current_stage_training_x = training_x[:m+2]
+                    current_stage_training_y = training_y[:m+2]
+                # print(current_stage_training_x.shape)
+                # print(current_stage_training_y.shape)
             else:  # 用cross entropy sorting
                 cross_entropy_of_all_data = sess.run(cross_entropy_for_sorting,
                                                      feed_dict={x: training_x, y_: training_y}).reshape(-1, 1)
                 # print(cross_entropy_of_all_data)
-                # TODO: 從小排到大 拿小的n筆
 
                 concat_x_and_y = np.concatenate((training_x, training_y), axis=1)
                 concat_entropy_and_x_y = np.concatenate((cross_entropy_of_all_data, concat_x_and_y), axis=1)
